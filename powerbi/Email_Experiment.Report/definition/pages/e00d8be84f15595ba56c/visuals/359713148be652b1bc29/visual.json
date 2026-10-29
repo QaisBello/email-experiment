@@ -1,0 +1,188 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "359713148be652b1bc29",
+  "position": {
+    "x": 640,
+    "y": 184,
+    "z": 11,
+    "width": 616,
+    "height": 524,
+    "tabOrder": 11
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Segments"
+                    }
+                  },
+                  "Property": "Group by"
+                }
+              },
+              "queryRef": "Segments.Group by",
+              "nativeQueryRef": "Group by",
+              "displayName": "Group by"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Segments"
+                    }
+                  },
+                  "Property": "level"
+                }
+              },
+              "queryRef": "Segments.level",
+              "nativeQueryRef": "level",
+              "displayName": "Group"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Arms"
+                    }
+                  },
+                  "Property": "Email"
+                }
+              },
+              "queryRef": "Arms.Email",
+              "nativeQueryRef": "Email",
+              "displayName": "Email"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Segments"
+                    }
+                  },
+                  "Property": "n"
+                }
+              },
+              "queryRef": "Segments.n",
+              "nativeQueryRef": "n",
+              "displayName": "Customers"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Segments"
+                    }
+                  },
+                  "Property": "Segment Spend Change"
+                }
+              },
+              "queryRef": "Segments.Segment Spend Change",
+              "nativeQueryRef": "Segment Spend Change",
+              "displayName": "Change"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Segments"
+                    }
+                  },
+                  "Property": "lo"
+                }
+              },
+              "queryRef": "Segments.lo",
+              "nativeQueryRef": "lo",
+              "displayName": "95% low"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Segments"
+                    }
+                  },
+                  "Property": "hi"
+                }
+              },
+              "queryRef": "Segments.hi",
+              "nativeQueryRef": "hi",
+              "displayName": "95% high"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Segments"
+                    }
+                  },
+                  "Property": "status"
+                }
+              },
+              "queryRef": "Segments.status",
+              "nativeQueryRef": "status",
+              "displayName": "Guardrail"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Every group, with its interval and guardrail status'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

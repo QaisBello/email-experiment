@@ -1,0 +1,24 @@
+/// What-if: customers on the list. Default 100,000.
+table 'List Size'
+
+	/// Selected list size (100,000 if none selected).
+	measure 'List Size Value' = SELECTEDVALUE ( 'List Size'[List Size], 100000 )
+		formatString: #,0
+		displayFolder: What-if
+
+	column 'List Size'
+		dataType: double
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: List Size
+
+	partition 'List Size' = m
+		mode: import
+		source = ```
+				let
+				    Source = Table.FromList(List.Transform({1..100}, each _ * 10000), Splitter.SplitByNothing(), {"List Size"}),
+				    Typed = Table.TransformColumnTypes(Source, {{"List Size", type number}})
+				in
+				    Typed
+				```
+

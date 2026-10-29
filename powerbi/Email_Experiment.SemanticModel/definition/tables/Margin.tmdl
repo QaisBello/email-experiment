@@ -1,0 +1,24 @@
+/// What-if: gross margin on sales (5% to 80%). Default 35%.
+table Margin
+
+	/// Selected gross margin (35% if none selected).
+	measure 'Margin Value' = SELECTEDVALUE ( Margin[Margin], 0.35 )
+		formatString: 0%
+		displayFolder: What-if
+
+	column Margin
+		dataType: double
+		formatString: 0%
+		summarizeBy: none
+		sourceColumn: Margin
+
+	partition Margin = m
+		mode: import
+		source = ```
+				let
+				    Source = Table.FromList(List.Transform({5..80}, each _ / 100), Splitter.SplitByNothing(), {"Margin"}),
+				    Typed = Table.TransformColumnTypes(Source, {{"Margin", type number}})
+				in
+				    Typed
+				```
+

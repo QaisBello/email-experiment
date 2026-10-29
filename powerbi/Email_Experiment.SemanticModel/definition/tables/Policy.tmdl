@@ -1,0 +1,92 @@
+/// Four sending options, chosen on one random half of customers and scored on the other half. Extra spend is per customer against sending nothing, with a bootstrap 95% range.
+table Policy
+
+	/// Profit on the extra sales minus the cost of the emails, against sending nothing.
+	measure 'Extra Profit' = SUMX ( Policy, ( Policy[lift_vs_nobody] * [Margin Value] - Policy[share_emailed] * [Email Cost Value] ) * [List Size Value] )
+		formatString: $#,0
+		displayFolder: Decision
+
+	/// The sending option with the most extra profit at the selected margin, cost and list size.
+	measure 'Best Option' =
+			VAR scored = ADDCOLUMNS ( ALL ( Policy[policy] ), "@profit", [Extra Profit] )
+			RETURN MAXX ( TOPN ( 1, scored, [@profit], DESC ), Policy[policy] )
+		displayFolder: Decision
+
+	/// Email cost above which targeting beats sending the men's email to everyone.
+	measure 'Break-Even Email Cost' =
+			VAR men = CALCULATE ( SUM ( Policy[lift_vs_nobody] ), Policy[policy] = "Men's email to all" )
+			VAR tgt = CALCULATE ( SUM ( Policy[lift_vs_nobody] ), Policy[policy] = "Targeted (by cell)" )
+			VAR menShare = CALCULATE ( SUM ( Policy[share_emailed] ), Policy[policy] = "Men's email to all" )
+			VAR tgtShare = CALCULATE ( SUM ( Policy[share_emailed] ), Policy[policy] = "Targeted (by cell)" )
+			RETURN DIVIDE ( ( men - tgt ) * [Margin Value], menShare - tgtShare )
+		formatString: $0.000
+		displayFolder: Decision
+
+	column policy
+		dataType: string
+		isKey
+		summarizeBy: none
+		sourceColumn: policy
+
+	column spend_per_customer
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		summarizeBy: none
+		sourceColumn: spend_per_customer
+
+	column lift_vs_nobody
+		dataType: double
+		formatString: +$#,0.00;-$#,0.00;$0.00
+		summarizeBy: none
+		sourceColumn: lift_vs_nobody
+
+	column lo
+		dataType: double
+		formatString: +$#,0.00;-$#,0.00;$0.00
+		summarizeBy: none
+		sourceColumn: lo
+
+	column hi
+		dataType: double
+		formatString: +$#,0.00;-$#,0.00;$0.00
+		summarizeBy: none
+		sourceColumn: hi
+
+	column share_emailed
+		dataType: double
+		formatString: 0%
+		summarizeBy: none
+		sourceColumn: share_emailed
+
+	partition Policy = m
+		mode: import
+		source = ```
+				let
+				    Source = Csv.Document(
+				        Web.Contents(BaseUrl, [RelativePath = "policy.csv"]),
+				        [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]
+				    ),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    // empty cells and R's NA arrive as text and would fail the type change: make them null
+				    #"Blanks to Null" = Table.TransformColumns(#"Promoted Headers", {}, each if _ = "" or _ = "NA" then null else _),
+				    // True/TRUE/true all become true: pandas writes True, R writes TRUE
+				    #"Booleans" = Table.TransformColumns(#"Blanks to Null", {}),
+				    #"Changed Types" = Table.TransformColumnTypes(
+				        #"Booleans",
+				        {
+				            {"policy", type text},
+				            {"spend_per_customer", type number},
+				            {"lift_vs_nobody", type number},
+				            {"lo", type number},
+				            {"hi", type number},
+				            {"share_emailed", type number}
+				        },
+				        "en-US"
+				    ),
+				    #"Filtered Rows" = #"Changed Types",
+				    Result = #"Filtered Rows"
+				in
+				    Result
+				```
+

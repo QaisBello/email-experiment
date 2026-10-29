@@ -1,0 +1,19 @@
+cell,arm,train_spend,chosen,customers
+Both · New this year,Mens E-Mail,2.4449840764331205,1,3911
+Both · Returning,Mens E-Mail,3.3916037735849054,1,2537
+Men's only · New this year,Mens E-Mail,1.8291708754208753,1,14134
+Men's only · Returning,Mens E-Mail,1.1782865168539325,0,14684
+Women's only · New this year,Mens E-Mail,0.7581284796573876,0,14099
+Women's only · Returning,Mens E-Mail,1.4651691805951896,1,14635
+Both · New this year,No E-Mail,1.952290076335878,0,3911
+Both · Returning,No E-Mail,1.2238693467336683,0,2537
+Men's only · New this year,No E-Mail,0.18572557172557172,0,14134
+Men's only · Returning,No E-Mail,1.3143804956035172,1,14684
+Women's only · New this year,No E-Mail,0.21302978723404256,0,14099
+Women's only · Returning,No E-Mail,0.7091340206185568,0,14635
+Both · New this year,Womens E-Mail,1.6955187319884728,0,3911
+Both · Returning,Womens E-Mail,0.36921951219512195,0,2537
+Men's only · New this year,Womens E-Mail,0.9929855195911415,0,14134
+Men's only · Returning,Womens E-Mail,1.092650748684743,0,14684
+Women's only · New this year,Womens E-Mail,0.9092068230277186,1,14099
+Women's only · Returning,Womens E-Mail,1.3278921568627453,0,14635

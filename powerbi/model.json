@@ -1,0 +1,910 @@
+{
+  "tables": [
+    {
+      "name": "Customers",
+      "description": "One row per customer (64,000), randomly assigned to the men's email, the women's email or no email. Outcomes cover the two weeks after the send.",
+      "columns": [
+        {
+          "name": "customer_id",
+          "type": "string",
+          "hidden": false,
+          "key": true
+        },
+        {
+          "name": "arm",
+          "type": "string",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "recency",
+          "type": "int64",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "recency_band",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "history",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "history_band",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "purchase_history",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "newbie",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "channel",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "zip_code",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "visit",
+          "type": "int64",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "conversion",
+          "type": "int64",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "spend",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        }
+      ]
+    },
+    {
+      "name": "Arms",
+      "description": "The three groups of the experiment. Email is the display name; Arm Order keeps no email first.",
+      "columns": [
+        {
+          "name": "arm",
+          "type": "string",
+          "hidden": true,
+          "key": true
+        },
+        {
+          "name": "Email",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "Arm Order",
+          "type": "int64",
+          "hidden": true,
+          "key": false
+        }
+      ]
+    },
+    {
+      "name": "Estimates",
+      "description": "Scorecard from the Python analysis: change against no email for every metric and email, 95% intervals, CUPED, and p-values adjusted for six comparisons (Holm).",
+      "columns": [
+        {
+          "name": "metric",
+          "type": "string",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "metric_name",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "arm",
+          "type": "string",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "control_mean",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "treat_mean",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "diff",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "rel",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "lo",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "hi",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "p",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "cuped_diff",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "cuped_lo",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "cuped_hi",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "variance_reduction",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "p_holm",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "significant",
+          "type": "boolean",
+          "hidden": false,
+          "key": false
+        }
+      ]
+    },
+    {
+      "name": "Sequential",
+      "description": "The test replayed in 14 daily batches (seeded random arrival order: the data has no timestamps), with the usual p-value and the always-valid p-value each day.",
+      "columns": [
+        {
+          "name": "metric",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "arm",
+          "type": "string",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "day",
+          "type": "int64",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "n",
+          "type": "int64",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "diff",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "lo",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "hi",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "p_naive",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "p_always_valid",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        }
+      ]
+    },
+    {
+      "name": "Segments",
+      "description": "Change in spend per customer for every pre-registered customer group, with the guardrail status: ok, harmed (whole interval below zero) or too small to tell (interval reaches below -$1).",
+      "columns": [
+        {
+          "name": "segment",
+          "type": "string",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "level",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "arm",
+          "type": "string",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "n",
+          "type": "int64",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "share",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "diff",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "lo",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "hi",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "level_order",
+          "type": "int64",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "Group by",
+          "type": "string",
+          "hidden": false,
+          "key": false
+        }
+      ]
+    },
+    {
+      "name": "Policy",
+      "description": "Four sending options, chosen on one random half of customers and scored on the other half. Extra spend is per customer against sending nothing, with a bootstrap 95% range.",
+      "columns": [
+        {
+          "name": "policy",
+          "type": "string",
+          "hidden": false,
+          "key": true
+        },
+        {
+          "name": "spend_per_customer",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "lift_vs_nobody",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "lo",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "hi",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        },
+        {
+          "name": "share_emailed",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        }
+      ]
+    },
+    {
+      "name": "AA Test",
+      "description": "1,000 fake tests (no email against no email) checked daily for 14 days: how often each p-value raised a false alarm.",
+      "columns": [
+        {
+          "name": "simulations",
+          "type": "int64",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "days",
+          "type": "int64",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "naive_false_alarm",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        },
+        {
+          "name": "always_valid_false_alarm",
+          "type": "double",
+          "hidden": true,
+          "key": false
+        }
+      ]
+    },
+    {
+      "name": "Margin",
+      "description": "What-if: gross margin on sales (5% to 80%). Default 35%.",
+      "columns": [
+        {
+          "name": "Margin",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        }
+      ]
+    },
+    {
+      "name": "Email Cost",
+      "description": "What-if: cost per email sent ($0 to $0.30). Default $0.02.",
+      "columns": [
+        {
+          "name": "Email Cost",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        }
+      ]
+    },
+    {
+      "name": "List Size",
+      "description": "What-if: customers on the list. Default 100,000.",
+      "columns": [
+        {
+          "name": "List Size",
+          "type": "double",
+          "hidden": false,
+          "key": false
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "fromTable": "Customers",
+      "fromColumn": "arm",
+      "toTable": "Arms",
+      "toColumn": "arm",
+      "both": false
+    },
+    {
+      "fromTable": "Estimates",
+      "fromColumn": "arm",
+      "toTable": "Arms",
+      "toColumn": "arm",
+      "both": false
+    },
+    {
+      "fromTable": "Sequential",
+      "fromColumn": "arm",
+      "toTable": "Arms",
+      "toColumn": "arm",
+      "both": false
+    },
+    {
+      "fromTable": "Segments",
+      "fromColumn": "arm",
+      "toTable": "Arms",
+      "toColumn": "arm",
+      "both": false
+    }
+  ],
+  "measures": [
+    {
+      "name": "Customers Count",
+      "table": "Customers",
+      "folder": "Outcomes",
+      "format": "#,0",
+      "dax": "COUNTROWS ( Customers )",
+      "description": "Customers in the current selection."
+    },
+    {
+      "name": "Spend per Customer",
+      "table": "Customers",
+      "folder": "Outcomes",
+      "format": "$#,0.00",
+      "dax": "AVERAGE ( Customers[spend] )",
+      "description": "Spend in the two weeks after the send, per customer."
+    },
+    {
+      "name": "Purchase Rate",
+      "table": "Customers",
+      "folder": "Outcomes",
+      "format": "0.00%",
+      "dax": "AVERAGE ( Customers[conversion] )",
+      "description": "Share of customers who bought."
+    },
+    {
+      "name": "Visit Rate",
+      "table": "Customers",
+      "folder": "Outcomes",
+      "format": "0.0%",
+      "dax": "AVERAGE ( Customers[visit] )",
+      "description": "Share of customers who visited the site."
+    },
+    {
+      "name": "Spend per Customer (No Email)",
+      "table": "Customers",
+      "folder": "Outcomes",
+      "format": "$#,0.00",
+      "dax": "CALCULATE ( [Spend per Customer], REMOVEFILTERS ( Arms ), Customers[arm] = \"No E-Mail\" )",
+      "description": "The no-email group's spend per customer: the baseline every lift is measured against."
+    },
+    {
+      "name": "Spend Change vs No Email",
+      "table": "Customers",
+      "folder": "Lift",
+      "format": "+$#,0.00;-$#,0.00;$0.00",
+      "dax": "[Spend per Customer] - [Spend per Customer (No Email)]",
+      "description": "Spend per customer minus the no-email group's (0 for the no-email group itself)."
+    },
+    {
+      "name": "Purchase Rate Change vs No Email",
+      "table": "Customers",
+      "folder": "Lift",
+      "format": "+0.00%;-0.00%;0.00%",
+      "dax": "[Purchase Rate] - CALCULATE ( [Purchase Rate], REMOVEFILTERS ( Arms ), Customers[arm] = \"No E-Mail\" )",
+      "description": "Purchase rate minus the no-email group's, in percentage points."
+    },
+    {
+      "name": "Men's Email Spend Lift",
+      "table": "Customers",
+      "folder": "Lift",
+      "format": "+$#,0.00;-$#,0.00;$0.00",
+      "dax": "CALCULATE ( [Spend per Customer], REMOVEFILTERS ( Arms ), Customers[arm] = \"Mens E-Mail\" ) - [Spend per Customer (No Email)]",
+      "description": "Extra spend per customer from the men's email."
+    },
+    {
+      "name": "Men's Email Spend Lift %",
+      "table": "Customers",
+      "folder": "Lift",
+      "format": "+0%;-0%;0%",
+      "dax": "DIVIDE ( [Men's Email Spend Lift], [Spend per Customer (No Email)] )",
+      "description": "The same as a percentage of the no-email group's spend."
+    },
+    {
+      "name": "Men's vs Women's Email",
+      "table": "Customers",
+      "folder": "Lift",
+      "format": "+$#,0.00;-$#,0.00;$0.00",
+      "dax": "CALCULATE ( [Spend per Customer], REMOVEFILTERS ( Arms ), Customers[arm] = \"Mens E-Mail\" ) - CALCULATE ( [Spend per Customer], REMOVEFILTERS ( Arms ), Customers[arm] = \"Womens E-Mail\" )",
+      "description": "How much more the men's email earned per customer than the women's."
+    },
+    {
+      "name": "Always-Valid p (Spend)",
+      "table": "Sequential",
+      "folder": "Monitoring",
+      "format": "0.0E+00",
+      "dax": "CALCULATE ( MIN ( Sequential[p_always_valid] ), Sequential[metric] = \"spend\" )",
+      "description": "Always-valid p-value for spend at each day: safe to check daily; call the test once it is below 0.05."
+    },
+    {
+      "name": "Usual p (Spend)",
+      "table": "Sequential",
+      "folder": "Monitoring",
+      "format": "0.0E+00",
+      "dax": "CALCULATE ( MIN ( Sequential[p_naive] ), Sequential[metric] = \"spend\" )",
+      "description": "The usual p-value for spend at each day. Checking it daily inflates false alarms."
+    },
+    {
+      "name": "Safe to Call Day",
+      "table": "Sequential",
+      "folder": "Monitoring",
+      "format": "0",
+      "dax": "CALCULATE ( MIN ( Sequential[day] ), REMOVEFILTERS ( Arms ), Sequential[arm] = \"Mens E-Mail\", Sequential[metric] = \"spend\", Sequential[p_always_valid] < 0.05 )",
+      "description": "First day the men's email spend result could be called with the always-valid p-value."
+    },
+    {
+      "name": "False Alarms, Usual p",
+      "table": "AA Test",
+      "folder": "Monitoring",
+      "format": "0.0%",
+      "dax": "MAX ( 'AA Test'[naive_false_alarm] )",
+      "description": "Share of fake (no difference) tests that 'found' a winner when the usual p-value was checked daily."
+    },
+    {
+      "name": "False Alarms, Always-Valid p",
+      "table": "AA Test",
+      "folder": "Monitoring",
+      "format": "0.0%",
+      "dax": "MAX ( 'AA Test'[always_valid_false_alarm] )",
+      "description": "The same with the always-valid p-value."
+    },
+    {
+      "name": "Segment Spend Change",
+      "table": "Segments",
+      "folder": "Guardrail",
+      "format": "+$#,0.00;-$#,0.00;$0.00",
+      "dax": "AVERAGE ( Segments[diff] )",
+      "description": "Change in spend per customer for a group, against no email."
+    },
+    {
+      "name": "Groups Harmed",
+      "table": "Segments",
+      "folder": "Guardrail",
+      "format": "0",
+      "dax": "CALCULATE ( DISTINCTCOUNT ( Segments[level] ), Segments[status] = \"harmed\" ) + 0",
+      "description": "Groups where the whole interval is below zero for either email."
+    },
+    {
+      "name": "Groups Too Small to Tell",
+      "table": "Segments",
+      "folder": "Guardrail",
+      "format": "0",
+      "dax": "CALCULATE ( DISTINCTCOUNT ( Segments[level] ), Segments[status] = \"too small to tell\" ) + 0",
+      "description": "Groups too small to rule out a loss beyond -$1 per customer."
+    },
+    {
+      "name": "Margin Value",
+      "table": "Margin",
+      "folder": "What-if",
+      "format": "0%",
+      "dax": "SELECTEDVALUE ( Margin[Margin], 0.35 )",
+      "description": "Selected gross margin (35% if none selected)."
+    },
+    {
+      "name": "Email Cost Value",
+      "table": "Email Cost",
+      "folder": "What-if",
+      "format": "$0.000",
+      "dax": "SELECTEDVALUE ( 'Email Cost'[Email Cost], 0.02 )",
+      "description": "Selected cost per email ($0.02 if none selected)."
+    },
+    {
+      "name": "List Size Value",
+      "table": "List Size",
+      "folder": "What-if",
+      "format": "#,0",
+      "dax": "SELECTEDVALUE ( 'List Size'[List Size], 100000 )",
+      "description": "Selected list size (100,000 if none selected)."
+    },
+    {
+      "name": "Extra Profit",
+      "table": "Policy",
+      "folder": "Decision",
+      "format": "$#,0",
+      "dax": "SUMX ( Policy, ( Policy[lift_vs_nobody] * [Margin Value] - Policy[share_emailed] * [Email Cost Value] ) * [List Size Value] )",
+      "description": "Profit on the extra sales minus the cost of the emails, against sending nothing."
+    },
+    {
+      "name": "Best Option",
+      "table": "Policy",
+      "folder": "Decision",
+      "format": null,
+      "dax": "VAR scored = ADDCOLUMNS ( ALL ( Policy[policy] ), \"@profit\", [Extra Profit] )\nRETURN MAXX ( TOPN ( 1, scored, [@profit], DESC ), Policy[policy] )",
+      "description": "The sending option with the most extra profit at the selected margin, cost and list size."
+    },
+    {
+      "name": "Break-Even Email Cost",
+      "table": "Policy",
+      "folder": "Decision",
+      "format": "$0.000",
+      "dax": "VAR men = CALCULATE ( SUM ( Policy[lift_vs_nobody] ), Policy[policy] = \"Men's email to all\" )\nVAR tgt = CALCULATE ( SUM ( Policy[lift_vs_nobody] ), Policy[policy] = \"Targeted (by cell)\" )\nVAR menShare = CALCULATE ( SUM ( Policy[share_emailed] ), Policy[policy] = \"Men's email to all\" )\nVAR tgtShare = CALCULATE ( SUM ( Policy[share_emailed] ), Policy[policy] = \"Targeted (by cell)\" )\nRETURN DIVIDE ( ( men - tgt ) * [Margin Value], menShare - tgtShare )",
+      "description": "Email cost above which targeting beats sending the men's email to everyone."
+    }
+  ],
+  "pages": [
+    {
+      "page": "The call",
+      "visuals": [
+        {
+          "type": "textbox",
+          "x": 24,
+          "y": 12,
+          "width": 1232,
+          "height": 52
+        },
+        {
+          "type": "card",
+          "x": 24,
+          "y": 76,
+          "width": 236,
+          "height": 96
+        },
+        {
+          "type": "card",
+          "x": 272,
+          "y": 76,
+          "width": 236,
+          "height": 96
+        },
+        {
+          "type": "card",
+          "x": 520,
+          "y": 76,
+          "width": 236,
+          "height": 96
+        },
+        {
+          "type": "card",
+          "x": 768,
+          "y": 76,
+          "width": 236,
+          "height": 96
+        },
+        {
+          "type": "card",
+          "x": 1016,
+          "y": 76,
+          "width": 236,
+          "height": 96
+        },
+        {
+          "type": "clusteredColumnChart",
+          "x": 24,
+          "y": 184,
+          "width": 600,
+          "height": 300
+        },
+        {
+          "type": "clusteredColumnChart",
+          "x": 640,
+          "y": 184,
+          "width": 616,
+          "height": 300
+        },
+        {
+          "type": "tableEx",
+          "x": 24,
+          "y": 496,
+          "width": 1232,
+          "height": 212
+        }
+      ]
+    },
+    {
+      "page": "When to stop",
+      "visuals": [
+        {
+          "type": "textbox",
+          "x": 24,
+          "y": 12,
+          "width": 1232,
+          "height": 52
+        },
+        {
+          "type": "card",
+          "x": 24,
+          "y": 76,
+          "width": 400,
+          "height": 96
+        },
+        {
+          "type": "card",
+          "x": 436,
+          "y": 76,
+          "width": 400,
+          "height": 96
+        },
+        {
+          "type": "card",
+          "x": 848,
+          "y": 76,
+          "width": 408,
+          "height": 96
+        },
+        {
+          "type": "lineChart",
+          "x": 24,
+          "y": 184,
+          "width": 612,
+          "height": 524
+        },
+        {
+          "type": "lineChart",
+          "x": 644,
+          "y": 184,
+          "width": 612,
+          "height": 524
+        }
+      ]
+    },
+    {
+      "page": "Who it works for",
+      "visuals": [
+        {
+          "type": "textbox",
+          "x": 24,
+          "y": 12,
+          "width": 860,
+          "height": 52
+        },
+        {
+          "type": "slicer",
+          "x": 900,
+          "y": 8,
+          "width": 356,
+          "height": 64
+        },
+        {
+          "type": "card",
+          "x": 24,
+          "y": 76,
+          "width": 600,
+          "height": 96
+        },
+        {
+          "type": "card",
+          "x": 636,
+          "y": 76,
+          "width": 620,
+          "height": 96
+        },
+        {
+          "type": "clusteredBarChart",
+          "x": 24,
+          "y": 184,
+          "width": 600,
+          "height": 524
+        },
+        {
+          "type": "tableEx",
+          "x": 640,
+          "y": 184,
+          "width": 616,
+          "height": 524
+        }
+      ]
+    },
+    {
+      "page": "The decision",
+      "visuals": [
+        {
+          "type": "textbox",
+          "x": 24,
+          "y": 12,
+          "width": 1232,
+          "height": 52
+        },
+        {
+          "type": "slicer",
+          "x": 24,
+          "y": 70,
+          "width": 300,
+          "height": 64
+        },
+        {
+          "type": "slicer",
+          "x": 336,
+          "y": 70,
+          "width": 300,
+          "height": 64
+        },
+        {
+          "type": "slicer",
+          "x": 648,
+          "y": 70,
+          "width": 300,
+          "height": 64
+        },
+        {
+          "type": "card",
+          "x": 960,
+          "y": 70,
+          "width": 296,
+          "height": 96
+        },
+        {
+          "type": "card",
+          "x": 24,
+          "y": 146,
+          "width": 924,
+          "height": 80
+        },
+        {
+          "type": "clusteredBarChart",
+          "x": 24,
+          "y": 238,
+          "width": 600,
+          "height": 470
+        },
+        {
+          "type": "tableEx",
+          "x": 640,
+          "y": 238,
+          "width": 616,
+          "height": 470
+        }
+      ]
+    }
+  ],
+  "base_url": "https://raw.githubusercontent.com/QaisBello/email-experiment/main/data/cleaned/"
+}

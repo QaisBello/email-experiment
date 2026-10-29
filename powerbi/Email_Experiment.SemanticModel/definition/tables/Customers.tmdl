@@ -1,0 +1,166 @@
+/// One row per customer (64,000), randomly assigned to the men's email, the women's email or no email. Outcomes cover the two weeks after the send.
+table Customers
+
+	/// Customers in the current selection.
+	measure 'Customers Count' = COUNTROWS ( Customers )
+		formatString: #,0
+		displayFolder: Outcomes
+
+	/// Spend in the two weeks after the send, per customer.
+	measure 'Spend per Customer' = AVERAGE ( Customers[spend] )
+		formatString: $#,0.00
+		displayFolder: Outcomes
+
+	/// Share of customers who bought.
+	measure 'Purchase Rate' = AVERAGE ( Customers[conversion] )
+		formatString: 0.00%
+		displayFolder: Outcomes
+
+	/// Share of customers who visited the site.
+	measure 'Visit Rate' = AVERAGE ( Customers[visit] )
+		formatString: 0.0%
+		displayFolder: Outcomes
+
+	/// The no-email group's spend per customer: the baseline every lift is measured against.
+	measure 'Spend per Customer (No Email)' = CALCULATE ( [Spend per Customer], REMOVEFILTERS ( Arms ), Customers[arm] = "No E-Mail" )
+		formatString: $#,0.00
+		displayFolder: Outcomes
+
+	/// Spend per customer minus the no-email group's (0 for the no-email group itself).
+	measure 'Spend Change vs No Email' = [Spend per Customer] - [Spend per Customer (No Email)]
+		formatString: +$#,0.00;-$#,0.00;$0.00
+		displayFolder: Lift
+
+	/// Purchase rate minus the no-email group's, in percentage points.
+	measure 'Purchase Rate Change vs No Email' = [Purchase Rate] - CALCULATE ( [Purchase Rate], REMOVEFILTERS ( Arms ), Customers[arm] = "No E-Mail" )
+		formatString: +0.00%;-0.00%;0.00%
+		displayFolder: Lift
+
+	/// Extra spend per customer from the men's email.
+	measure 'Men''s Email Spend Lift' = CALCULATE ( [Spend per Customer], REMOVEFILTERS ( Arms ), Customers[arm] = "Mens E-Mail" ) - [Spend per Customer (No Email)]
+		formatString: +$#,0.00;-$#,0.00;$0.00
+		displayFolder: Lift
+
+	/// The same as a percentage of the no-email group's spend.
+	measure 'Men''s Email Spend Lift %' = DIVIDE ( [Men's Email Spend Lift], [Spend per Customer (No Email)] )
+		formatString: +0%;-0%;0%
+		displayFolder: Lift
+
+	/// How much more the men's email earned per customer than the women's.
+	measure 'Men''s vs Women''s Email' = CALCULATE ( [Spend per Customer], REMOVEFILTERS ( Arms ), Customers[arm] = "Mens E-Mail" ) - CALCULATE ( [Spend per Customer], REMOVEFILTERS ( Arms ), Customers[arm] = "Womens E-Mail" )
+		formatString: +$#,0.00;-$#,0.00;$0.00
+		displayFolder: Lift
+
+	column customer_id
+		dataType: string
+		isKey
+		summarizeBy: none
+		sourceColumn: customer_id
+
+	column arm
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: arm
+
+	column recency
+		dataType: int64
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: recency
+
+	column recency_band
+		dataType: string
+		summarizeBy: none
+		sourceColumn: recency_band
+
+	column history
+		dataType: double
+		formatString: $#,0.00
+		summarizeBy: none
+		sourceColumn: history
+
+	column history_band
+		dataType: string
+		summarizeBy: none
+		sourceColumn: history_band
+
+	column purchase_history
+		dataType: string
+		summarizeBy: none
+		sourceColumn: purchase_history
+
+	column newbie
+		dataType: string
+		summarizeBy: none
+		sourceColumn: newbie
+
+	column channel
+		dataType: string
+		summarizeBy: none
+		sourceColumn: channel
+
+	column zip_code
+		dataType: string
+		summarizeBy: none
+		sourceColumn: zip_code
+
+	column visit
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: visit
+
+	column conversion
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: conversion
+
+	column spend
+		dataType: double
+		isHidden
+		formatString: $#,0.00
+		summarizeBy: none
+		sourceColumn: spend
+
+	partition Customers = m
+		mode: import
+		source = ```
+				let
+				    Source = Csv.Document(
+				        Web.Contents(BaseUrl, [RelativePath = "customers.csv"]),
+				        [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]
+				    ),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    // empty cells and R's NA arrive as text and would fail the type change: make them null
+				    #"Blanks to Null" = Table.TransformColumns(#"Promoted Headers", {}, each if _ = "" or _ = "NA" then null else _),
+				    // True/TRUE/true all become true: pandas writes True, R writes TRUE
+				    #"Booleans" = Table.TransformColumns(#"Blanks to Null", {}),
+				    #"Changed Types" = Table.TransformColumnTypes(
+				        #"Booleans",
+				        {
+				            {"customer_id", type text},
+				            {"arm", type text},
+				            {"recency", Int64.Type},
+				            {"recency_band", type text},
+				            {"history", type number},
+				            {"history_band", type text},
+				            {"purchase_history", type text},
+				            {"newbie", type text},
+				            {"channel", type text},
+				            {"zip_code", type text},
+				            {"visit", Int64.Type},
+				            {"conversion", Int64.Type},
+				            {"spend", type number}
+				        },
+				        "en-US"
+				    ),
+				    #"Filtered Rows" = #"Changed Types",
+				    Result = #"Filtered Rows"
+				in
+				    Result
+				```
+

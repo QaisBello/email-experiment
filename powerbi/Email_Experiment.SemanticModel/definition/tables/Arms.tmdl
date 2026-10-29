@@ -1,0 +1,35 @@
+/// The three groups of the experiment. Email is the display name; Arm Order keeps no email first.
+table Arms
+
+	column arm
+		dataType: string
+		isHidden
+		isKey
+		summarizeBy: none
+		sourceColumn: arm
+
+	column Email
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Email
+		sortByColumn: 'Arm Order'
+
+	column 'Arm Order'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: Arm Order
+
+	partition Arms = m
+		mode: import
+		source = ```
+				let
+				    Source = #table(
+				        type table [arm = text, Email = text, #"Arm Order" = Int64.Type],
+				        {{"No E-Mail", "No email", 0}, {"Mens E-Mail", "Men's email", 1}, {"Womens E-Mail", "Women's email", 2}}
+				    )
+				in
+				    Source
+				```
+

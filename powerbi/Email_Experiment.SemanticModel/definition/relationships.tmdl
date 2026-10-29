@@ -1,0 +1,15 @@
+relationship 0a93d153-090d-572e-acf0-eecb96d3c492
+	fromColumn: Customers.arm
+	toColumn: Arms.arm
+
+relationship 7d2d0e09-ee67-5b4d-ac43-4c3b842d8d9b
+	fromColumn: Estimates.arm
+	toColumn: Arms.arm
+
+relationship b5d8d505-7d5c-58d9-a353-692d8acd9265
+	fromColumn: Sequential.arm
+	toColumn: Arms.arm
+
+relationship 00c94c97-e348-5348-bf6b-2b8da3fb8301
+	fromColumn: Segments.arm
+	toColumn: Arms.arm

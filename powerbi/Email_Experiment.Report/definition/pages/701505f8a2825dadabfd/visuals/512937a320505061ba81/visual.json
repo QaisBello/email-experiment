@@ -1,0 +1,173 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "512937a320505061ba81",
+  "position": {
+    "x": 24,
+    "y": 496,
+    "z": 12,
+    "width": 1232,
+    "height": 212,
+    "tabOrder": 12
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Estimates"
+                    }
+                  },
+                  "Property": "metric_name"
+                }
+              },
+              "queryRef": "Estimates.metric_name",
+              "nativeQueryRef": "metric_name",
+              "displayName": "Metric"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Arms"
+                    }
+                  },
+                  "Property": "Email"
+                }
+              },
+              "queryRef": "Arms.Email",
+              "nativeQueryRef": "Email",
+              "displayName": "Email"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Estimates"
+                    }
+                  },
+                  "Property": "diff"
+                }
+              },
+              "queryRef": "Estimates.diff",
+              "nativeQueryRef": "diff",
+              "displayName": "Change vs no email"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Estimates"
+                    }
+                  },
+                  "Property": "lo"
+                }
+              },
+              "queryRef": "Estimates.lo",
+              "nativeQueryRef": "lo",
+              "displayName": "95% low"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Estimates"
+                    }
+                  },
+                  "Property": "hi"
+                }
+              },
+              "queryRef": "Estimates.hi",
+              "nativeQueryRef": "hi",
+              "displayName": "95% high"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Estimates"
+                    }
+                  },
+                  "Property": "rel"
+                }
+              },
+              "queryRef": "Estimates.rel",
+              "nativeQueryRef": "rel",
+              "displayName": "% change"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Estimates"
+                    }
+                  },
+                  "Property": "p_holm"
+                }
+              },
+              "queryRef": "Estimates.p_holm",
+              "nativeQueryRef": "p_holm",
+              "displayName": "p (Holm-adjusted)"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Scorecard: change against no email (spend in $, rates as proportions)'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

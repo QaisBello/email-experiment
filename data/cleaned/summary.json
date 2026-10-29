@@ -1,0 +1,330 @@
+{
+  "experiment": {
+    "id": "EXP-2008-03-EMAIL",
+    "name": "Spring email campaign",
+    "unit": "customer",
+    "control": "No E-Mail",
+    "treatments": [
+      "Mens E-Mail",
+      "Womens E-Mail"
+    ],
+    "outcome_window_days": 14,
+    "pre_period_covariate": "history"
+  },
+  "registry": {
+    "experiment": {
+      "id": "EXP-2008-03-EMAIL",
+      "name": "Spring email campaign",
+      "unit": "customer",
+      "control": "No E-Mail",
+      "treatments": [
+        "Mens E-Mail",
+        "Womens E-Mail"
+      ],
+      "outcome_window_days": 14,
+      "pre_period_covariate": "history"
+    },
+    "metrics": [
+      {
+        "id": "spend",
+        "name": "Spend per customer",
+        "role": "primary",
+        "type": "mean",
+        "column": "spend",
+        "unit": "$",
+        "better": "higher"
+      },
+      {
+        "id": "conversion",
+        "name": "Purchase rate",
+        "role": "secondary",
+        "type": "proportion",
+        "column": "conversion",
+        "unit": "%",
+        "better": "higher"
+      },
+      {
+        "id": "visit",
+        "name": "Site visit rate",
+        "role": "secondary",
+        "type": "proportion",
+        "column": "visit",
+        "unit": "%",
+        "better": "higher"
+      }
+    ],
+    "guardrails": [
+      {
+        "id": "no_segment_harmed",
+        "name": "No customer group is harmed",
+        "rule": "for every pre-registered group, the 95% lower bound of the spend effect stays above -$1.00",
+        "threshold": -1.0
+      }
+    ],
+    "segments": [
+      "purchase_history",
+      "history_band",
+      "recency_band",
+      "newbie",
+      "channel",
+      "zip_code"
+    ],
+    "alpha": 0.05,
+    "multiple_testing": "holm"
+  },
+  "customers": 64000,
+  "arms": {
+    "No E-Mail": 21306,
+    "Mens E-Mail": 21307,
+    "Womens E-Mail": 21387
+  },
+  "buyers": 578,
+  "srm": {
+    "counts": {
+      "No E-Mail": 21306,
+      "Mens E-Mail": 21307,
+      "Womens E-Mail": 21387
+    },
+    "chi2": 0.20253125000000002,
+    "p": 0.9036929575604196,
+    "ok": true
+  },
+  "max_abs_smd": 0.011013588354428299,
+  "estimates": {
+    "spend|Mens E-Mail": {
+      "metric": "spend",
+      "metric_name": "Spend per customer",
+      "role": "primary",
+      "arm": "Mens E-Mail",
+      "control_mean": 0.6527893551112361,
+      "treat_mean": 1.422616511005773,
+      "diff": 0.7698271558945368,
+      "rel": 1.1792887703620063,
+      "lo": 0.48514912892878365,
+      "hi": 1.0545051828602898,
+      "p": 1.1571368879646323e-07,
+      "cuped_diff": 0.7673357755525777,
+      "cuped_lo": 0.48271938242221035,
+      "cuped_hi": 1.051952168682945,
+      "variance_reduction": 0.0004329604505630691,
+      "p_holm": 3.471410663893897e-07,
+      "significant": true
+    },
+    "spend|Womens E-Mail": {
+      "metric": "spend",
+      "metric_name": "Spend per customer",
+      "role": "primary",
+      "arm": "Womens E-Mail",
+      "control_mean": 0.6527893551112361,
+      "treat_mean": 1.0772015710478329,
+      "diff": 0.4244122159365967,
+      "rel": 0.6501518638646863,
+      "lo": 0.16896450721722805,
+      "hi": 0.6798599246559653,
+      "p": 0.0011284596637324692,
+      "cuped_diff": 0.42230258560577305,
+      "cuped_lo": 0.16690044321046765,
+      "cuped_hi": 0.6777047280010784,
+      "variance_reduction": 0.00035672475020687155,
+      "p_holm": 0.0011284596637324692,
+      "significant": true
+    },
+    "conversion|Mens E-Mail": {
+      "metric": "conversion",
+      "metric_name": "Purchase rate",
+      "role": "secondary",
+      "arm": "Mens E-Mail",
+      "control_mean": 0.005726086548390125,
+      "treat_mean": 0.01253109306800582,
+      "diff": 0.006805006519615695,
+      "rel": 1.188421876286328,
+      "lo": 0.005000129025231786,
+      "hi": 0.008609884013999603,
+      "p": 1.4712093247956462e-13,
+      "cuped_diff": 0.006783794630068699,
+      "cuped_lo": 0.004979712079258722,
+      "cuped_hi": 0.008587877180878676,
+      "variance_reduction": 0.0008806897013206028,
+      "p_holm": 5.884837299182585e-13,
+      "significant": true
+    },
+    "conversion|Womens E-Mail": {
+      "metric": "conversion",
+      "metric_name": "Purchase rate",
+      "role": "secondary",
+      "arm": "Womens E-Mail",
+      "control_mean": 0.005726086548390125,
+      "treat_mean": 0.008837144059475383,
+      "diff": 0.003111057511085258,
+      "rel": 0.5433130436982172,
+      "lo": 0.0014986400681705587,
+      "hi": 0.004723474953999957,
+      "p": 0.00015580695663629465,
+      "cuped_diff": 0.003093095883625662,
+      "cuped_lo": 0.0014811885633739983,
+      "cuped_hi": 0.004705003203877326,
+      "variance_reduction": 0.0006326425841920447,
+      "p_holm": 0.0003116139132725893,
+      "significant": true
+    },
+    "visit|Mens E-Mail": {
+      "metric": "visit",
+      "metric_name": "Site visit rate",
+      "role": "secondary",
+      "arm": "Mens E-Mail",
+      "control_mean": 0.10616727682343002,
+      "treat_mean": 0.18275684047496127,
+      "diff": 0.07658956365153125,
+      "rel": 0.721404616781399,
+      "lo": 0.06995334548485052,
+      "hi": 0.08322578181821197,
+      "p": 2.7404293498294904e-113,
+      "cuped_diff": 0.07641374670919525,
+      "cuped_lo": 0.0697922813732572,
+      "cuped_hi": 0.0830352120451333,
+      "variance_reduction": 0.004441213964240798,
+      "p_holm": 1.6442576098976943e-112,
+      "significant": true
+    },
+    "visit|Womens E-Mail": {
+      "metric": "visit",
+      "metric_name": "Site visit rate",
+      "role": "secondary",
+      "arm": "Womens E-Mail",
+      "control_mean": 0.10616727682343002,
+      "treat_mean": 0.151400383410483,
+      "diff": 0.045233106587052985,
+      "rel": 0.4260550702669102,
+      "lo": 0.03889367736347529,
+      "hi": 0.051572535810630676,
+      "p": 1.9318565617797842e-44,
+      "cuped_diff": 0.045084229778491094,
+      "cuped_lo": 0.038757419226954394,
+      "cuped_hi": 0.051411040330027795,
+      "variance_reduction": 0.003977049928334697,
+      "p_holm": 9.659282808898921e-44,
+      "significant": true
+    }
+  },
+  "bootstrap_spend_ci": {
+    "Mens E-Mail": [
+      0.48288622191128616,
+      1.044441327417735
+    ],
+    "Womens E-Mail": [
+      0.17108905980008993,
+      0.6791263434055118
+    ]
+  },
+  "aa_test": {
+    "simulations": 1000,
+    "days": 14,
+    "naive_false_alarm": 0.186,
+    "always_valid_false_alarm": 0.002
+  },
+  "first_always_valid_call_day": {
+    "Mens E-Mail": 5,
+    "Womens E-Mail": 4
+  },
+  "harmed_segments": [],
+  "uncertain_segments": [
+    {
+      "segment": "history_band",
+      "level": "$1,000 +",
+      "arm": "Mens E-Mail",
+      "n": 1308,
+      "diff": 1.3220673076923077,
+      "lo": -2.4652993492476085,
+      "hi": 5.109433964632224
+    },
+    {
+      "segment": "history_band",
+      "level": "$1,000 +",
+      "arm": "Womens E-Mail",
+      "n": 1308,
+      "diff": 2.5067810927390366,
+      "lo": -1.9187366967503583,
+      "hi": 6.932298882228432
+    }
+  ],
+  "head_to_head": {
+    "spend": {
+      "treat": 1.422616511005773,
+      "control": 1.0772015710478329,
+      "diff": 0.34541493995794004,
+      "se": 0.15961741484165423,
+      "lo": 0.032570555562908665,
+      "hi": 0.6582593243529714,
+      "p": 0.03046297705647739,
+      "rel": 0.32065952115344803
+    },
+    "conversion": {
+      "treat": 0.01253109306800582,
+      "control": 0.008837144059475383,
+      "diff": 0.003693949008530437,
+      "se": 0.0009951621494566109,
+      "lo": 0.0017434670368180131,
+      "hi": 0.005644430980242861,
+      "p": 0.00020570385066017642,
+      "rel": 0.4180025790764045
+    },
+    "visit": {
+      "treat": 0.18275684047496127,
+      "control": 0.151400383410483,
+      "diff": 0.03135645706447826,
+      "se": 0.003608000837174793,
+      "lo": 0.0242849053674253,
+      "hi": 0.03842800876153122,
+      "p": 3.598580275849713e-18,
+      "rel": 0.20710949574984452
+    }
+  },
+  "regression_adjustment": {
+    "spend": 0.0019662794913137827,
+    "conversion": 0.0025063906491501475,
+    "visit": 0.02807052429583401,
+    "history_spend_correlation": 0.021729000144139914
+  },
+  "policy": [
+    {
+      "policy": "Email nobody",
+      "spend_per_customer": 0.5852767004067734,
+      "lift_vs_nobody": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "share_emailed": 0.0
+    },
+    {
+      "policy": "Men's email to all",
+      "spend_per_customer": 1.3861222756863856,
+      "lift_vs_nobody": 0.8008455752796122,
+      "lo": 0.4300106905452559,
+      "hi": 1.1872030833636085,
+      "share_emailed": 1.0
+    },
+    {
+      "policy": "Women's email to all",
+      "spend_per_customer": 1.0585512135694872,
+      "lift_vs_nobody": 0.47327451316271385,
+      "lo": 0.12348290918565216,
+      "hi": 0.8153137759220571,
+      "share_emailed": 1.0
+    },
+    {
+      "policy": "Targeted (by cell)",
+      "spend_per_customer": 1.3618925496068888,
+      "lift_vs_nobody": 0.7766158492001154,
+      "lo": 0.4510544016399433,
+      "hi": 1.0988437309492294,
+      "share_emailed": 0.7732797336767061
+    }
+  ],
+  "policy_choice": {
+    "Both \u00b7 New this year": "Mens E-Mail",
+    "Both \u00b7 Returning": "Mens E-Mail",
+    "Men's only \u00b7 New this year": "Mens E-Mail",
+    "Men's only \u00b7 Returning": "No E-Mail",
+    "Women's only \u00b7 New this year": "Womens E-Mail",
+    "Women's only \u00b7 Returning": "Mens E-Mail"
+  }
+}

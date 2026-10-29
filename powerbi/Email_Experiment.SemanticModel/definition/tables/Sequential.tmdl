@@ -1,0 +1,111 @@
+/// The test replayed in 14 daily batches (seeded random arrival order: the data has no timestamps), with the usual p-value and the always-valid p-value each day.
+table Sequential
+
+	/// Always-valid p-value for spend at each day: safe to check daily; call the test once it is below 0.05.
+	measure 'Always-Valid p (Spend)' = CALCULATE ( MIN ( Sequential[p_always_valid] ), Sequential[metric] = "spend" )
+		formatString: 0.0E+00
+		displayFolder: Monitoring
+
+	/// The usual p-value for spend at each day. Checking it daily inflates false alarms.
+	measure 'Usual p (Spend)' = CALCULATE ( MIN ( Sequential[p_naive] ), Sequential[metric] = "spend" )
+		formatString: 0.0E+00
+		displayFolder: Monitoring
+
+	/// First day the men's email spend result could be called with the always-valid p-value.
+	measure 'Safe to Call Day' = CALCULATE ( MIN ( Sequential[day] ), REMOVEFILTERS ( Arms ), Sequential[arm] = "Mens E-Mail", Sequential[metric] = "spend", Sequential[p_always_valid] < 0.05 )
+		formatString: 0
+		displayFolder: Monitoring
+
+	column metric
+		dataType: string
+		summarizeBy: none
+		sourceColumn: metric
+
+	column arm
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: arm
+
+	column day
+		dataType: int64
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: day
+
+	column n
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: n
+
+	column diff
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		summarizeBy: none
+		sourceColumn: diff
+
+	column lo
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		summarizeBy: none
+		sourceColumn: lo
+
+	column hi
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		summarizeBy: none
+		sourceColumn: hi
+
+	column p_naive
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		summarizeBy: none
+		sourceColumn: p_naive
+
+	column p_always_valid
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		summarizeBy: none
+		sourceColumn: p_always_valid
+
+	partition Sequential = m
+		mode: import
+		source = ```
+				let
+				    Source = Csv.Document(
+				        Web.Contents(BaseUrl, [RelativePath = "sequential.csv"]),
+				        [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]
+				    ),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    // empty cells and R's NA arrive as text and would fail the type change: make them null
+				    #"Blanks to Null" = Table.TransformColumns(#"Promoted Headers", {}, each if _ = "" or _ = "NA" then null else _),
+				    // True/TRUE/true all become true: pandas writes True, R writes TRUE
+				    #"Booleans" = Table.TransformColumns(#"Blanks to Null", {}),
+				    #"Changed Types" = Table.TransformColumnTypes(
+				        #"Booleans",
+				        {
+				            {"metric", type text},
+				            {"arm", type text},
+				            {"day", Int64.Type},
+				            {"n", Int64.Type},
+				            {"diff", type number},
+				            {"lo", type number},
+				            {"hi", type number},
+				            {"p_naive", type number},
+				            {"p_always_valid", type number}
+				        },
+				        "en-US"
+				    ),
+				    #"Filtered Rows" = #"Changed Types",
+				    Result = #"Filtered Rows"
+				in
+				    Result
+				```
+

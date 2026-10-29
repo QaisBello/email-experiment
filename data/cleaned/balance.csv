@@ -1,0 +1,15 @@
+covariate,arm,smd
+history,Mens E-Mail,0.00761286832154239
+history,Womens E-Mail,0.006510722458553667
+recency,Mens E-Mail,0.006831532454259954
+recency,Womens E-Mail,0.005180013205688683
+new this year,Mens E-Mail,-0.0008918953696535328
+new this year,Womens E-Mail,0.0025567009140795606
+bought men's,Mens E-Mail,-0.0045823256374879625
+bought men's,Womens E-Mail,-0.008630731202832915
+bought women's,Mens E-Mail,0.007588929691887142
+bought women's,Womens E-Mail,0.004946313992582152
+web channel,Mens E-Mail,0.011013588354428299
+web channel,Womens E-Mail,-0.005147863897421752
+urban,Mens E-Mail,0.0019722315768513645
+urban,Womens E-Mail,-0.0017628666291550237

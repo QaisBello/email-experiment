@@ -1,0 +1,176 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "d6a0d36dc7bd570bb01a",
+  "position": {
+    "x": 640,
+    "y": 238,
+    "z": 11,
+    "width": 616,
+    "height": 470,
+    "tabOrder": 11
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Policy"
+                    }
+                  },
+                  "Property": "policy"
+                }
+              },
+              "queryRef": "Policy.policy",
+              "nativeQueryRef": "policy",
+              "displayName": "Option"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Policy"
+                    }
+                  },
+                  "Property": "share_emailed"
+                }
+              },
+              "queryRef": "Policy.share_emailed",
+              "nativeQueryRef": "share_emailed",
+              "displayName": "Emailed"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Policy"
+                    }
+                  },
+                  "Property": "lift_vs_nobody"
+                }
+              },
+              "queryRef": "Policy.lift_vs_nobody",
+              "nativeQueryRef": "lift_vs_nobody",
+              "displayName": "Extra spend per customer"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Policy"
+                    }
+                  },
+                  "Property": "lo"
+                }
+              },
+              "queryRef": "Policy.lo",
+              "nativeQueryRef": "lo",
+              "displayName": "95% low"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Policy"
+                    }
+                  },
+                  "Property": "hi"
+                }
+              },
+              "queryRef": "Policy.hi",
+              "nativeQueryRef": "hi",
+              "displayName": "95% high"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Policy"
+                    }
+                  },
+                  "Property": "Extra Profit"
+                }
+              },
+              "queryRef": "Policy.Extra Profit",
+              "nativeQueryRef": "Extra Profit",
+              "displayName": "Extra profit"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "Policy"
+                  }
+                },
+                "Property": "Extra Profit"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Options scored on the held-out half of customers'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

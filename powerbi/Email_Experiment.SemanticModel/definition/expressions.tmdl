@@ -1,0 +1,2 @@
+/// Folder of cleaned CSVs from this repo (data/cleaned). Point it at a local folder or another branch to test.
+expression BaseUrl = "https://raw.githubusercontent.com/QaisBello/email-experiment/main/data/cleaned/" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]

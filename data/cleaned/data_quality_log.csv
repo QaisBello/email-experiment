@@ -1,0 +1,9 @@
+check,rows_affected,action
+Rows loaded,64000,"64,000 customers, one row each, 3 arms"
+Missing values,0,None found
+Identical rows,6562,"Kept. There is no customer ID and every column is coarse (bands, flags, mostly-zero outcomes), so identical rows are expected for different customers"
+"Purchase without spend, spend without purchase, or purchase without visit",0,None found
+History band disagrees with history dollars,0,None found
+Customer bought neither men's nor women's items last year,0,None found
+"Area spelled ""Surburban""",28776,"Renamed to ""Suburban"""
+Sample ratio across the 3 arms,64000,chi-square p = 0.90; split is as designed

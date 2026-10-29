@@ -1,0 +1,121 @@
+/// Change in spend per customer for every pre-registered customer group, with the guardrail status: ok, harmed (whole interval below zero) or too small to tell (interval reaches below -$1).
+table Segments
+
+	/// Change in spend per customer for a group, against no email.
+	measure 'Segment Spend Change' = AVERAGE ( Segments[diff] )
+		formatString: +$#,0.00;-$#,0.00;$0.00
+		displayFolder: Guardrail
+
+	/// Groups where the whole interval is below zero for either email.
+	measure 'Groups Harmed' = CALCULATE ( DISTINCTCOUNT ( Segments[level] ), Segments[status] = "harmed" ) + 0
+		formatString: 0
+		displayFolder: Guardrail
+
+	/// Groups too small to rule out a loss beyond -$1 per customer.
+	measure 'Groups Too Small to Tell' = CALCULATE ( DISTINCTCOUNT ( Segments[level] ), Segments[status] = "too small to tell" ) + 0
+		formatString: 0
+		displayFolder: Guardrail
+
+	column segment
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: segment
+
+	column level
+		dataType: string
+		summarizeBy: none
+		sourceColumn: level
+		sortByColumn: level_order
+
+	column arm
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: arm
+
+	column n
+		dataType: int64
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: n
+
+	column share
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		summarizeBy: none
+		sourceColumn: share
+
+	column diff
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		summarizeBy: none
+		sourceColumn: diff
+
+	column lo
+		dataType: double
+		formatString: +$#,0.00;-$#,0.00;$0.00
+		summarizeBy: none
+		sourceColumn: lo
+
+	column hi
+		dataType: double
+		formatString: +$#,0.00;-$#,0.00;$0.00
+		summarizeBy: none
+		sourceColumn: hi
+
+	column status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: status
+
+	column level_order
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: level_order
+
+	column 'Group by'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Group by
+
+	partition Segments = m
+		mode: import
+		source = ```
+				let
+				    Source = Csv.Document(
+				        Web.Contents(BaseUrl, [RelativePath = "segments.csv"]),
+				        [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]
+				    ),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    // empty cells and R's NA arrive as text and would fail the type change: make them null
+				    #"Blanks to Null" = Table.TransformColumns(#"Promoted Headers", {}, each if _ = "" or _ = "NA" then null else _),
+				    // True/TRUE/true all become true: pandas writes True, R writes TRUE
+				    #"Booleans" = Table.TransformColumns(#"Blanks to Null", {}),
+				    #"Changed Types" = Table.TransformColumnTypes(
+				        #"Booleans",
+				        {
+				            {"segment", type text},
+				            {"level", type text},
+				            {"arm", type text},
+				            {"n", Int64.Type},
+				            {"share", type number},
+				            {"diff", type number},
+				            {"lo", type number},
+				            {"hi", type number},
+				            {"status", type text},
+				            {"level_order", Int64.Type}
+				        },
+				        "en-US"
+				    ),
+				    #"Filtered Rows" = #"Changed Types",
+				    #"Group by" = Table.AddColumn(#"Filtered Rows", "Group by", each Record.FieldOrDefault([purchase_history = "Bought before", history_band = "Last year's spend", recency_band = "Last purchase", newbie = "New or returning", channel = "Channel", zip_code = "Area"], [segment], [segment]), type text),
+				    Result = #"Group by"
+				in
+				    Result
+				```
+

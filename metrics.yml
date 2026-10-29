@@ -1,0 +1,40 @@
+# Metric registry: every number in the readout comes from a definition here.
+# Change a definition, rerun src/analyse.py, and every chart, table and the memo update together.
+experiment:
+  id: EXP-2008-03-EMAIL
+  name: "Spring email campaign"
+  unit: customer
+  control: "No E-Mail"
+  treatments: ["Mens E-Mail", "Womens E-Mail"]
+  outcome_window_days: 14
+  pre_period_covariate: history        # dollars spent in the previous 12 months
+metrics:
+  - id: spend
+    name: "Spend per customer"
+    role: primary
+    type: mean
+    column: spend
+    unit: "$"
+    better: higher
+  - id: conversion
+    name: "Purchase rate"
+    role: secondary
+    type: proportion
+    column: conversion
+    unit: "%"
+    better: higher
+  - id: visit
+    name: "Site visit rate"
+    role: secondary
+    type: proportion
+    column: visit
+    unit: "%"
+    better: higher
+guardrails:
+  - id: no_segment_harmed
+    name: "No customer group is harmed"
+    rule: "for every pre-registered group, the 95% lower bound of the spend effect stays above -$1.00"
+    threshold: -1.0
+segments: [purchase_history, history_band, recency_band, newbie, channel, zip_code]
+alpha: 0.05
+multiple_testing: holm

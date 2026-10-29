@@ -1,0 +1,434 @@
+<title>Email Experiment Readout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+/* An experiment readout written as a decision memo: the call first, then the checks that make it safe. */
+:root{
+  --paper:#f4f3ef; --card:#fffefb; --ink:#14130f; --ink-2:#4d4a42; --muted:#8a867b; --rule:#e2dfd5; --axis:#c9c5b8; --soft:#efede6;
+  --ctrl:#8a867b; --mens:#0f7a73; --womens:#c98a12; --good:#0f7a3a; --bad:#b4372b; --hl:#14130f;
+  --disp:"Bricolage Grotesque",system-ui,sans-serif; --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#11110e; --card:#1b1a16; --ink:#f1efe7; --ink-2:#c7c3b6; --muted:#8f8b7f; --rule:#2e2c26; --axis:#3e3b33; --soft:#24221d;
+  --ctrl:#8f8b7f; --mens:#2bb3a8; --womens:#e2a83a; --good:#3cba6a; --bad:#e2675a; --hl:#f1efe7; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --paper:#11110e; --card:#1b1a16; --ink:#f1efe7; --ink-2:#c7c3b6; --muted:#8f8b7f; --rule:#2e2c26; --axis:#3e3b33; --soft:#24221d;
+  --ctrl:#8f8b7f; --mens:#2bb3a8; --womens:#e2a83a; --good:#3cba6a; --bad:#e2675a; --hl:#f1efe7; color-scheme:dark; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:clamp(16px,3vw,32px);padding-block:28px 56px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3,p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px 40px;align-items:start}
+.head h1{font-family:var(--disp);font-weight:800;font-size:clamp(44px,7vw,88px);line-height:.92;letter-spacing:-.035em;margin-top:12px}
+.head h1 em{font-style:normal;color:var(--mens)}
+.lede{font-size:17px;line-height:1.5;color:var(--ink-2);margin-top:16px;max-width:46ch}
+.lede b{color:var(--ink)}
+.src{font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.src a{color:var(--ink)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.dot.live{background:var(--good)}
+.memo{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:4px 20px 8px;position:relative}
+.memo::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:4px;border-radius:0 3px 3px 0;background:var(--mens)}
+.memo .row{display:grid;grid-template-columns:86px 1fr;gap:12px;padding:12px 0;border-bottom:1px dashed var(--rule)}
+.memo .row:last-child{border-bottom:0}
+.memo .row .k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.memo .row .v{color:var(--ink-2)}
+.memo .row .v b{color:var(--ink)}
+.memo .row.call .v{font-family:var(--disp);font-size:22px;font-weight:700;line-height:1.2;color:var(--ink)}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--rule);border-radius:14px;background:var(--card);overflow:hidden}
+.kpi{padding:14px 16px;border-right:1px solid var(--rule);min-width:0}
+.kpi:last-child{border-right:0}
+.kpi .k{font-size:12px;color:var(--ink-2)}
+.kpi .v{font-family:var(--disp);font-size:clamp(26px,3vw,36px);font-weight:700;line-height:1.1;margin-top:4px;letter-spacing:-.02em}
+.kpi .s{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.panel h2{font-family:var(--disp);font-weight:700;font-size:24px;line-height:1.15;letter-spacing:-.015em}
+.panel .sub{color:var(--ink-2);max-width:70ch}
+.panel .sub b{color:var(--ink)}
+.s12{grid-column:span 12}.s7{grid-column:span 7}.s5{grid-column:span 5}.s6{grid-column:span 6}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:500 12.5px var(--sans);border:0;background:transparent;color:var(--ink-2);padding:6px 11px;cursor:pointer;min-height:32px}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg button:focus-visible,input:focus-visible{outline:2px solid var(--mens);outline-offset:2px}
+svg{display:block;max-width:100%}
+svg text{fill:var(--ink-2);font-family:var(--sans);font-size:11px}
+.axis path,.axis line{stroke:var(--axis)}
+.axis text{fill:var(--muted);font-family:var(--mono);font-size:10px}
+.gl line{stroke:var(--rule)} .gl path{display:none}
+.callout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.callout div{border:1px solid var(--rule);border-radius:10px;padding:10px 12px;background:var(--soft)}
+.callout b{font-family:var(--disp);font-size:30px;font-weight:700;display:block;line-height:1.05;letter-spacing:-.02em}
+.callout span{font-size:12.5px;color:var(--ink-2)}
+.note{font-size:12px;color:var(--muted)}
+.chip{display:inline-block;font:500 11px var(--mono);padding:2px 7px;border-radius:99px;border:1px solid var(--rule);white-space:nowrap}
+.chip.ok{color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,transparent)}
+.chip.warn{color:var(--womens);border-color:color-mix(in srgb,var(--womens) 50%,transparent)}
+.chip.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 50%,transparent)}
+.sliders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.sl label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-2)}
+.sl label b{font-family:var(--mono);color:var(--ink);font-weight:500}
+.sl input{width:100%;accent-color:var(--mens)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font:500 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 8px;border-bottom:1px solid var(--rule)}
+td{padding:7px 8px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-2)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12px}
+.tablewrap{overflow-x:auto}
+details summary{cursor:pointer;font-family:var(--disp);font-weight:700;font-size:20px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"+";font-family:var(--mono);color:var(--muted)}
+details[open] summary::after{content:"−"}
+pre{white-space:pre-wrap;font:12px/1.55 var(--mono);background:var(--soft);border:1px solid var(--rule);border-radius:10px;padding:12px;overflow:auto;color:var(--ink-2);margin:0}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--paper);font-size:12px;padding:7px 9px;border-radius:7px;opacity:0;transition:opacity .12s;max-width:280px;z-index:9;line-height:1.45}
+footer{font-size:12px;color:var(--muted);line-height:1.6}
+@media (max-width:900px){.head{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi{border-bottom:1px solid var(--rule)}.s7,.s5,.s6{grid-column:span 12}.sliders{grid-template-columns:1fr}}
+@media (max-width:480px){.callout{grid-template-columns:1fr}.memo .row{grid-template-columns:1fr;gap:2px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<!--SITEBAR-->
+<div class="wrap">
+  <header class="head">
+    <div>
+      <div class="eyebrow">Experiment readout · EXP-2008-03-EMAIL · 64,000 customers</div>
+      <h1>Send the <em>men's</em> email.</h1>
+      <p class="lede" id="lede">A retailer tested two emails against no email. One email clearly earned its keep. This readout is built the way experimentation platforms work: checks first, a metric for every question, no reading the result early, and a decision at the end.</p>
+      <div class="src" id="src"><span class="dot"></span>Loading results…</div>
+    </div>
+    <aside class="memo" aria-label="Decision memo" id="memo"></aside>
+  </header>
+
+  <section class="kpis" id="kpis" aria-label="Key figures"></section>
+
+  <section class="grid">
+    <article class="panel s7">
+      <div class="eyebrow">01 · Scorecard</div>
+      <h2>Both emails beat no email; the men's email beat both</h2>
+      <p class="sub">Change against the no-email group, with 95% intervals. P-values are adjusted for running six comparisons at once (Holm), so a lucky result is less likely to sneak through.</p>
+      <div class="controls"><div class="seg" id="scaleSeg" role="group" aria-label="Scale"><button data-v="rel" aria-pressed="true">% change</button><button data-v="abs" aria-pressed="false">Actual units</button></div>
+        <div class="legend"><span><i style="background:var(--mens)"></i>Men's email</span><span><i style="background:var(--womens)"></i>Women's email</span></div></div>
+      <div id="score"></div>
+    </article>
+
+    <article class="panel s5">
+      <div class="eyebrow">02 · Before any result</div>
+      <h2>Was the split fair?</h2>
+      <p class="sub">If the three groups differ in size or in who they contain, every number after this is suspect. Bars show group sizes; dots show how far each group drifts from the no-email group on things measured before the email went out.</p>
+      <div id="split"></div>
+      <div id="balance"></div>
+    </article>
+
+    <article class="panel s12">
+      <div class="eyebrow">03 · When to stop</div>
+      <h2>Checking a test every day makes it lie, unless the stats allow for it</h2>
+      <p class="sub">Most teams look at their test daily. With the usual p-value, each look is another chance of a false alarm. An always-valid p-value is built to be checked as often as you like. <b>Grey</b>: the usual p-value. <b>Colour</b>: always-valid. A call is safe once the coloured line drops below the 0.05 line.</p>
+      <div class="controls">
+        <div class="seg" id="seqMetric" role="group" aria-label="Metric"></div>
+        <div class="seg" id="seqArm" role="group" aria-label="Email"></div>
+      </div>
+      <div class="grid" style="gap:16px">
+        <div style="grid-column:span 8;min-width:0" id="seqChart"></div>
+        <div style="grid-column:span 4;min-width:0;display:flex;flex-direction:column;gap:10px">
+          <div class="callout" id="aa"></div>
+          <p class="note" id="seqNote"></p>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel s6">
+      <div class="eyebrow">04 · Guardrail</div>
+      <h2>Who does it work for?</h2>
+      <p class="sub">Change in spend per customer for each group, against no email. The guardrail fails if any group is clearly worse off. The dashed line is the most loss we'd accept (−$1 per customer).</p>
+      <div class="controls"><div class="seg" id="segPick" role="group" aria-label="Group by"></div></div>
+      <div id="segChart"></div>
+      <p class="note" id="segNote"></p>
+    </article>
+
+    <article class="panel s6">
+      <div class="eyebrow">05 · Speed-up check</div>
+      <h2>Why this test couldn't be made faster</h2>
+      <p class="sub">CUPED shortens tests by using each customer's past behaviour to cancel out noise. It only works when the past predicts the outcome. Here, last year's spend barely predicts spend in the two weeks after the email.</p>
+      <div id="cuped"></div>
+      <p class="note" id="cupedNote"></p>
+    </article>
+
+    <article class="panel s12">
+      <div class="eyebrow">06 · The decision</div>
+      <h2>Which email, to whom, and is it worth the send?</h2>
+      <p class="sub">Each option was chosen on one random half of customers and scored on the other half, so the targeted option isn't graded on the data that picked it. Move the sliders to your own margin and email cost. The figures are your assumptions, not data.</p>
+      <div class="sliders">
+        <div class="sl"><label for="mg">Gross margin on sales <b id="mgV"></b></label><input id="mg" type="range" min="5" max="80" step="1" value="35"></div>
+        <div class="sl"><label for="ct">Cost per email sent <b id="ctV"></b></label><input id="ct" type="range" min="0" max="0.30" step="0.005" value="0.02"></div>
+        <div class="sl"><label for="ls">Customers on the list <b id="lsV"></b></label><input id="ls" type="range" min="10000" max="1000000" step="10000" value="100000"></div>
+      </div>
+      <div class="grid" style="gap:16px">
+        <div style="grid-column:span 7;min-width:0" id="profit"></div>
+        <div style="grid-column:span 5;min-width:0" class="tablewrap" id="cells"></div>
+      </div>
+      <p class="note" id="profitNote"></p>
+    </article>
+
+    <article class="panel s12">
+      <details>
+        <summary><span>Metric registry and data checks</span><span class="eyebrow" id="logCount"></span></summary>
+        <p class="sub" style="margin:10px 0">Every metric is defined once in <code>metrics.yml</code> in the repo. Change a definition, rerun the analysis, and every chart and the memo update together.</p>
+        <div class="grid" style="gap:16px">
+          <div style="grid-column:span 6;min-width:0"><pre id="registry"></pre></div>
+          <div style="grid-column:span 6;min-width:0" class="tablewrap"><table id="log"></table></div>
+        </div>
+      </details>
+    </article>
+  </section>
+
+  <footer>Data: Kevin Hillstrom's MineThatData E-Mail Analytics challenge (2008), a public dataset of 64,000 customers randomly sent a men's email, a women's email or no email, with visits, purchases and spend over the next two weeks. The dataset has no timestamps, so the daily view uses a seeded random arrival order. Margin and email cost are inputs you choose. Analysis and readout by Qais Adeniji-Bello.</footer>
+</div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+const SOURCE={repo:"QaisBello/email-experiment",branch:"main",dir:"data/cleaned"};
+const FALLBACKS=/*FALLBACKS*/["../data/cleaned/"];
+const RAW=f=>`https://raw.githubusercontent.com/${SOURCE.repo}/${SOURCE.branch}/${SOURCE.dir}/${f}`;
+const ARMS={"Mens E-Mail":"Men's email","Womens E-Mail":"Women's email","No E-Mail":"No email"};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const COL=a=>css(a==="Mens E-Mail"?"--mens":a==="Womens E-Mail"?"--womens":"--ctrl");
+const tip=document.getElementById("tip");
+const showTip=(e,h)=>{tip.innerHTML=h;tip.style.opacity=1;tip.style.left=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8)+"px";tip.style.top=(e.clientY+14)+"px";};
+const hideTip=()=>{tip.style.opacity=0;};
+const money=(v,d=2)=>(v<0?"−":"")+"$"+Math.abs(v).toFixed(d);
+const smoney=(v,d=2)=>(v>=0?"+":"−")+"$"+Math.abs(v).toFixed(d);
+const pct=(v,d=0)=>(v*100).toFixed(d)+"%";
+const spct=(v,d=0)=>(v>=0?"+":"−")+Math.abs(v*100).toFixed(d)+"%";
+const pts=(v,d=1)=>(v>=0?"+":"−")+Math.abs(v*100).toFixed(d)+" pts";
+const fmtP=p=>p<0.001?"p < 0.001":"p = "+p.toFixed(p<0.01?3:2);
+const big=n=>n>=1e6?(n/1e6).toFixed(n%1e6?1:0)+"M":n>=1e3?Math.round(n/1e3)+"k":String(n);
+let S,E,Q,G,P,C,B,L;
+const ST={scale:"rel",seqMetric:"spend",seqArm:"Mens E-Mail",seg:"purchase_history"};
+function seg(id,opts,key,fn){const el=document.getElementById(id);el.innerHTML="";opts.forEach(([v,l])=>{const b=document.createElement("button");b.type="button";b.textContent=l;b.dataset.v=v;b.setAttribute("aria-pressed",String(ST[key]===v));b.onclick=()=>{ST[key]=v;el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.v===v)));fn();};el.appendChild(b);});}
+function unitFmt(metric,v){return metric==="spend"?smoney(v):pts(v,2);}
+
+function renderMemo(){
+  const m=S.estimates["spend|Mens E-Mail"], h=S.head_to_head.spend, pol=Object.fromEntries(S.policy.map(p=>[p.policy,p]));
+  const unc=new Set(S.uncertain_segments.map(r=>r.segment+r.level)).size, harmed=new Set(S.harmed_segments.map(r=>r.segment+r.level)).size;
+  const uncName=[...new Set(S.uncertain_segments.map(r=>r.level))].join(", ");
+  document.getElementById("memo").innerHTML=`
+    <div class="row call"><div class="k">Call</div><div class="v">Send the men's email to the whole list.</div></div>
+    <div class="row"><div class="k">Why</div><div class="v">It added <b>${smoney(m.diff)}</b> of spend per customer over no email (${spct(m.rel)}), and <b>${smoney(h.diff)}</b> more than the women's email (${fmtP(h.p)}). Visits and purchases moved the same way.</div></div>
+    <div class="row"><div class="k">Safe?</div><div class="v">The split was fair, ${harmed?`<b>${harmed}</b> groups were harmed`:"<b>no group was harmed</b>"}${unc?`, and ${unc===1?"one small group":unc+" small groups"} (${uncName}) ${unc===1?"was":"were"} too small to judge`:""}. Checked daily, the result was safe to call from day ${S.first_always_valid_call_day["Mens E-Mail"]} of 14.</div></div>
+    <div class="row"><div class="k">Not this</div><div class="v">Targeting by customer type emails ${pct(1-pol["Targeted (by cell)"].share_emailed)} fewer people for almost the same spend. Worth it only if emails are expensive. See section 06.</div></div>
+    <div class="row"><div class="k">Next</div><div class="v">Store each customer's spend in the 2 weeks <i>before</i> the next send. That gives CUPED something to work with and makes the next test shorter.</div></div>`;
+}
+function renderKPIs(){
+  const m=S.estimates["spend|Mens E-Mail"], h=S.head_to_head.spend;
+  const k=[
+    ["Spend per customer, men's email",smoney(m.diff),`${spct(m.rel)} vs no email`],
+    ["Men's vs women's email",smoney(h.diff),`per customer · ${fmtP(h.p)}`],
+    ["Safe to call",`Day ${S.first_always_valid_call_day["Mens E-Mail"]}`,"of 14, checked daily"],
+    ["Groups harmed",String(new Set(S.harmed_segments.map(r=>r.segment+r.level)).size),`${new Set(S.uncertain_segments.map(r=>r.segment+r.level)).size} too small to tell`],
+    ["Split check",S.srm.ok?"Fair":"Broken",`sample ratio ${fmtP(S.srm.p)}`],
+  ];
+  document.getElementById("kpis").innerHTML=k.map(([a,b,c])=>`<div class="kpi"><div class="k">${a}</div><div class="v num">${b}</div><div class="s">${c}</div></div>`).join("");
+}
+
+function renderScore(){
+  const host=document.getElementById("score");host.innerHTML="";
+  const names={spend:"Spend per customer",conversion:"Purchase rate",visit:"Site visit rate"};
+  const rows=E.map(r=>({...r,v:ST.scale==="rel"?r.rel:r.diff,l:ST.scale==="rel"?r.lo/r.control_mean:r.lo,h:ST.scale==="rel"?r.hi/r.control_mean:r.hi}));
+  const metrics=["spend","conversion","visit"];
+  const W=Math.max(host.clientWidth,300), narrow=W<520, lw=narrow?4:150, top=narrow?20:0, rowH=30, gap=18, H=metrics.length*(2*rowH+gap+top)+26;
+  const svg=d3.select(host).append("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("width",W).attr("height",H).attr("role","img").attr("aria-label","Change by metric and email");
+  let y=0;
+  metrics.forEach(mt=>{
+    const rs=rows.filter(r=>r.metric===mt);
+    const max=ST.scale==="rel"?d3.max(rows,r=>r.h):d3.max(rs,r=>r.h);
+    const x=d3.scaleLinear().domain([Math.min(0,d3.min(ST.scale==="rel"?rows:rs,r=>r.l)),max*1.08]).range([lw,W-70]);
+    y+=top;
+    svg.append("text").attr("x",0).attr("y",narrow?y-8:y+rowH).attr("dy",".35em").style("font-weight",600).style("fill",css("--ink")).style("font-size","12.5px").text(names[mt]);
+    svg.append("line").attr("x1",x(0)).attr("x2",x(0)).attr("y1",y+4).attr("y2",y+2*rowH-4).attr("stroke",css("--axis"));
+    rs.forEach((r,i)=>{
+      const cy=y+rowH*i+rowH/2+2;
+      const g=svg.append("g").on("mousemove",e=>showTip(e,`<b>${ARMS[r.arm]} · ${names[mt]}</b><br>No email ${mt==="spend"?money(r.control_mean):pct(r.control_mean,1)} → ${mt==="spend"?money(r.treat_mean):pct(r.treat_mean,1)}<br>${unitFmt(mt,r.diff)} (${spct(r.rel)})<br>95% interval ${unitFmt(mt,r.lo)} to ${unitFmt(mt,r.hi)}<br>Holm-adjusted ${fmtP(r.p_holm)}`)).on("mouseleave",hideTip);
+      g.append("rect").attr("x",lw).attr("y",cy-rowH/2).attr("width",W-lw).attr("height",rowH).attr("fill","transparent");
+      g.append("rect").attr("x",x(0)).attr("y",cy-7).attr("height",14).attr("rx",3).attr("width",Math.max(1,x(r.v)-x(0))).attr("fill",COL(r.arm)).attr("opacity",.9);
+      g.append("line").attr("x1",x(r.l)).attr("x2",x(r.h)).attr("y1",cy).attr("y2",cy).attr("stroke",css("--ink")).attr("stroke-width",1.4);
+      [r.l,r.h].forEach(v=>g.append("line").attr("x1",x(v)).attr("x2",x(v)).attr("y1",cy-5).attr("y2",cy+5).attr("stroke",css("--ink")).attr("stroke-width",1.4));
+      g.append("text").attr("x",Math.max(x(r.h),x(r.v))+8).attr("y",cy).attr("dy",".35em").style("font-family","var(--mono)").style("font-size","11px").style("fill",css("--ink"))
+        .text(ST.scale==="rel"?spct(r.rel):unitFmt(mt,r.diff));
+    });
+    y+=2*rowH+gap;
+  });
+  svg.append("text").attr("x",lw).attr("y",H-6).attr("class","note").style("fill",css("--muted")).style("font-family","var(--mono)").style("font-size","10px")
+    .text(ST.scale==="rel"?"% change vs no email":"Spend in $; rates in % points");
+}
+
+function renderSplit(){
+  const host=document.getElementById("split");host.innerHTML="";
+  const arms=["No E-Mail","Mens E-Mail","Womens E-Mail"], n=arms.map(a=>S.arms[a]);
+  const W=Math.max(host.clientWidth,260), H=104, lw=104, x=d3.scaleLinear().domain([0,d3.max(n)]).range([0,W-lw-110]);
+  const svg=d3.select(host).append("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("width",W).attr("height",H);
+  arms.forEach((a,i)=>{const y=i*30+6;
+    svg.append("text").attr("x",lw-10).attr("y",y+10).attr("dy",".35em").attr("text-anchor","end").style("fill",css("--ink")).text(ARMS[a]);
+    svg.append("rect").attr("x",lw).attr("y",y+2).attr("height",16).attr("rx",3).attr("width",x(n[i])).attr("fill",COL(a));
+    svg.append("text").attr("x",lw+x(n[i])+8).attr("y",y+10).attr("dy",".35em").style("font-family","var(--mono)").text(d3.format(",")(n[i])+" · "+pct(n[i]/S.customers,1));});
+  svg.append("text").attr("x",0).attr("y",H-4).style("font-family","var(--mono)").style("font-size","10px").style("fill",css("--good")).text(`✓ Split as designed (${fmtP(S.srm.p)})`);
+}
+function renderBalance(){
+  const host=document.getElementById("balance");host.innerHTML="";
+  const covs=[...new Set(B.map(r=>r.covariate))];
+  const W=Math.max(host.clientWidth,260), rowH=22, lw=104, H=covs.length*rowH+46;
+  const x=d3.scaleLinear().domain([-.1,.1]).range([lw,W-14]);
+  const svg=d3.select(host).append("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("width",W).attr("height",H);
+  svg.append("rect").attr("x",x(-.05)).attr("width",x(.05)-x(-.05)).attr("y",0).attr("height",H-36).attr("fill",css("--soft"));
+  svg.append("line").attr("x1",x(0)).attr("x2",x(0)).attr("y1",0).attr("y2",H-36).attr("stroke",css("--axis"));
+  covs.forEach((c,i)=>{const y=i*rowH+rowH/2;
+    svg.append("text").attr("x",lw-10).attr("y",y).attr("dy",".35em").attr("text-anchor","end").text(c);
+    B.filter(r=>r.covariate===c).forEach(r=>svg.append("circle").attr("cx",x(r.smd)).attr("cy",y).attr("r",4.5).attr("fill",COL(r.arm))
+      .on("mousemove",e=>showTip(e,`<b>${ARMS[r.arm]} · ${c}</b><br>Standardised difference ${r.smd.toFixed(3)}<br>Under 0.05 counts as balanced`)).on("mouseleave",hideTip));});
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-36})`).call(d3.axisBottom(x).ticks(5).tickSizeOuter(0));
+  svg.append("text").attr("x",x(0)).attr("y",H-2).attr("text-anchor","middle").style("font-size","10px").style("fill",css("--muted")).text(`Largest drift ${S.max_abs_smd.toFixed(3)}. Shaded band = balanced`);
+}
+
+function renderSeq(){
+  const host=document.getElementById("seqChart");host.innerHTML="";
+  const rs=Q.filter(r=>r.metric===ST.seqMetric&&r.arm===ST.seqArm);
+  const W=Math.max(host.clientWidth,300), H=260, m={t:14,r:16,b:30,l:52};
+  const x=d3.scaleLinear().domain([1,14]).range([m.l,W-m.r]);
+  const lo=Math.max(1e-12,d3.min(rs,r=>Math.min(r.p_naive,r.p_always_valid)));
+  const y=d3.scaleLog().domain([Math.min(1e-4,lo),1]).range([H-m.b,m.t]).clamp(true);
+  const svg=d3.select(host).append("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("width",W).attr("height",H).attr("role","img").attr("aria-label","P-value over 14 days");
+  svg.append("g").attr("class","axis gl").attr("transform",`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5,"~g").tickSize(-(W-m.l-m.r)));
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-m.b})`).call(d3.axisBottom(x).ticks(14).tickFormat(d=>"day "+d).tickSizeOuter(0));
+  svg.append("line").attr("x1",m.l).attr("x2",W-m.r).attr("y1",y(.05)).attr("y2",y(.05)).attr("stroke",css("--bad")).attr("stroke-dasharray","4 3");
+  svg.append("text").attr("x",W-m.r).attr("y",y(.05)-6).attr("text-anchor","end").style("fill",css("--bad")).style("font-family","var(--mono)").style("font-size","10px").text("0.05: call it below here");
+  const line=k=>d3.line().x(r=>x(r.day)).y(r=>y(Math.max(r[k],1e-12)));
+  svg.append("path").datum(rs).attr("d",line("p_naive")).attr("fill","none").attr("stroke",css("--muted")).attr("stroke-width",2).attr("stroke-dasharray","5 4");
+  svg.append("path").datum(rs).attr("d",line("p_always_valid")).attr("fill","none").attr("stroke",COL(ST.seqArm)).attr("stroke-width",2.6);
+  const call=rs.find(r=>r.p_always_valid<.05);
+  if(call){svg.append("circle").attr("cx",x(call.day)).attr("cy",y(call.p_always_valid)).attr("r",5.5).attr("fill",COL(ST.seqArm)).attr("stroke",css("--card")).attr("stroke-width",2);
+    svg.append("text").attr("x",x(call.day)+9).attr("y",y(call.p_always_valid)-10).style("fill",css("--ink")).style("font-weight",600).text(`Safe to call: day ${call.day}`);}
+  const cross=svg.append("line").attr("y1",m.t).attr("y2",H-m.b).attr("stroke",css("--axis")).style("opacity",0);
+  svg.append("rect").attr("x",m.l).attr("y",m.t).attr("width",W-m.l-m.r).attr("height",H-m.t-m.b).attr("fill","transparent")
+    .on("mousemove",e=>{const dd=Math.round(x.invert(d3.pointer(e)[0]));const r=rs.find(q=>q.day===dd);if(!r)return;cross.attr("x1",x(dd)).attr("x2",x(dd)).style("opacity",1);
+      showTip(e,`<b>Day ${dd}</b> · ${d3.format(",")(r.n)} customers in<br>Change so far ${unitFmt(r.metric,r.diff)}<br>Usual p ${r.p_naive.toExponential(1)}<br>Always-valid p ${r.p_always_valid.toExponential(1)}`);})
+    .on("mouseleave",()=>{cross.style("opacity",0);hideTip();});
+  document.getElementById("seqNote").textContent=call?`For this metric and email, the always-valid result crossed the line on day ${call.day}. Running on to day 14 narrowed the estimate but didn't change the call.`:"For this metric and email, the always-valid result never crossed the line in 14 days.";
+}
+function renderAA(){
+  const a=S.aa_test;
+  document.getElementById("aa").innerHTML=`<div><b class="num" style="color:var(--bad)">${pct(a.naive_false_alarm,0)}</b><span>of ${d3.format(",")(a.simulations)} fake tests (no-email vs no-email) "found" a winner with daily checks and the usual p-value</span></div>
+  <div><b class="num" style="color:var(--good)">${pct(a.always_valid_false_alarm,1)}</b><span>did with the always-valid p-value, under the 5% the test promises</span></div>`;
+}
+
+function renderSeg(){
+  const host=document.getElementById("segChart");host.innerHTML="";
+  const order={history_band:["$0 - $100","$100 - $200","$200 - $350","$350 - $500","$500 - $750","$750 - $1,000","$1,000 +"],recency_band:["1-3 months","4-6 months","7-9 months","10-12 months"]};
+  let levels=[...new Set(G.filter(r=>r.segment===ST.seg).map(r=>r.level))];
+  if(order[ST.seg]) levels=order[ST.seg].filter(l=>levels.includes(l));
+  const rs=G.filter(r=>r.segment===ST.seg);
+  const W=Math.max(host.clientWidth,300), rowH=22, grpH=2*rowH+10, lw=W<480?104:130, H=levels.length*grpH+28;
+  const x=d3.scaleLinear().domain([Math.min(-1.5,d3.min(rs,r=>r.lo)),Math.max(1,d3.max(rs,r=>r.hi))]).nice().range([lw,W-12]);
+  const svg=d3.select(host).append("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("width",W).attr("height",H);
+  svg.append("line").attr("x1",x(0)).attr("x2",x(0)).attr("y1",0).attr("y2",H-24).attr("stroke",css("--axis"));
+  svg.append("line").attr("x1",x(-1)).attr("x2",x(-1)).attr("y1",0).attr("y2",H-24).attr("stroke",css("--bad")).attr("stroke-dasharray","4 3");
+  levels.forEach((lv,i)=>{const y0=i*grpH;
+    const n=rs.find(r=>r.level===lv).n;
+    svg.append("text").attr("x",lw-10).attr("y",y0+rowH).attr("dy","-.1em").attr("text-anchor","end").style("fill",css("--ink")).style("font-weight",500).text(lv);
+    svg.append("text").attr("x",lw-10).attr("y",y0+rowH).attr("dy","1.1em").attr("text-anchor","end").style("font-family","var(--mono)").style("font-size","10px").style("fill",css("--muted")).text(pct(n/S.customers,0)+" of list");
+    ["Mens E-Mail","Womens E-Mail"].forEach((a,j)=>{const r=rs.find(q=>q.level===lv&&q.arm===a);const cy=y0+j*rowH+rowH/2+3;
+      const st=r.status==="ok"?"":r.status==="harmed"?"bad":"warn";
+      const g=svg.append("g").on("mousemove",e=>showTip(e,`<b>${lv} · ${ARMS[a]}</b><br>${smoney(r.diff)} per customer<br>95% interval ${smoney(r.lo)} to ${smoney(r.hi)}<br>${d3.format(",")(r.n)} customers in this group (all arms)${r.status!=="ok"?"<br><b>"+(r.status==="harmed"?"Harmed":"Too few customers to rule out a loss")+"</b>":""}`)).on("mouseleave",hideTip);
+      g.append("rect").attr("x",lw).attr("y",cy-rowH/2).attr("width",W-lw).attr("height",rowH).attr("fill","transparent");
+      g.append("line").attr("x1",x(r.lo)).attr("x2",x(r.hi)).attr("y1",cy).attr("y2",cy).attr("stroke",COL(a)).attr("stroke-width",2.4).attr("stroke-linecap","round").attr("opacity",st?.55:1);
+      g.append("circle").attr("cx",x(r.diff)).attr("cy",cy).attr("r",4.5).attr("fill",COL(a)).attr("stroke",st==="warn"?css("--ink"):"none");});
+  });
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-24})`).call(d3.axisBottom(x).ticks(6).tickFormat(v=>smoney(v,0)).tickSizeOuter(0));
+  const unc=rs.filter(r=>r.status==="too small to tell"), harm=rs.filter(r=>r.status==="harmed");
+  document.getElementById("segNote").innerHTML=harm.length?`<span class="chip bad">Guardrail failed</span> ${harm.map(r=>r.level+" · "+ARMS[r.arm]).join(", ")}`:
+    unc.length?`<span class="chip warn">Too small to tell</span> ${[...new Set(unc.map(r=>r.level))].join(", ")}: the estimates are positive but too few customers to rule out a loss. <span class="chip ok">Guardrail passed</span> everywhere else.`:
+    `<span class="chip ok">Guardrail passed</span> No group in this view is worse off.`;
+}
+
+function renderCuped(){
+  const host=document.getElementById("cuped");host.innerHTML="";
+  const names={spend:"Spend",conversion:"Purchase rate",visit:"Visit rate"};
+  const data=["spend","conversion","visit"].map(m=>({m,cuped:S.estimates[m+"|Mens E-Mail"].variance_reduction,reg:S.regression_adjustment[m]}));
+  const W=Math.max(host.clientWidth,280), rowH=46, lw=100, H=data.length*rowH+34;
+  const x=d3.scaleLinear().domain([0,.1]).range([lw,W-60]);
+  const svg=d3.select(host).append("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("width",W).attr("height",H);
+  data.forEach((d,i)=>{const y=i*rowH+18;
+    svg.append("text").attr("x",lw-10).attr("y",y+10).attr("dy",".35em").attr("text-anchor","end").style("fill",css("--ink")).text(names[d.m]);
+    [["cuped","CUPED (last year's spend)",css("--mens")],["reg","Every pre-email column",css("--ink-2")]].forEach(([k,l,c],j)=>{
+      svg.append("rect").attr("x",lw).attr("y",y+j*12).attr("height",9).attr("rx",2).attr("width",Math.max(2,x(d[k])-lw)).attr("fill",c)
+        .on("mousemove",e=>showTip(e,`<b>${names[d.m]} · ${l}</b><br>Noise removed: ${pct(d[k],2)}`)).on("mouseleave",hideTip);
+      svg.append("text").attr("x",Math.max(x(d[k]),lw+2)+6).attr("y",y+j*12+5).attr("dy",".35em").style("font-family","var(--mono)").style("font-size","10px").text(pct(d[k],1));});});
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-24})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format(".0%")).tickSizeOuter(0));
+  document.getElementById("cupedNote").innerHTML=`<span class="legend"><span><i style="background:var(--mens)"></i>CUPED, last year's spend</span><span><i style="background:var(--ink-2)"></i>Every pre-email column</span></span> Last year's spend and spend after the email correlate at r = ${S.regression_adjustment.history_spend_correlation.toFixed(2)}, so CUPED removed almost no noise. A shorter test needs a pre-period of the same metric: spend in the 2 weeks before the send.`;
+}
+
+function renderProfit(){
+  const mg=+document.getElementById("mg").value/100, ct=+document.getElementById("ct").value, N=+document.getElementById("ls").value;
+  document.getElementById("mgV").textContent=Math.round(mg*100)+"%";document.getElementById("ctV").textContent="$"+ct.toFixed(3).replace(/0$/,"");document.getElementById("lsV").textContent=d3.format(",")(N);
+  const rows=P.map(p=>({...p,profit:(p.lift_vs_nobody*mg-p.share_emailed*ct)*N,plo:(p.lo*mg-p.share_emailed*ct)*N,phi:(p.hi*mg-p.share_emailed*ct)*N}));
+  const best=rows.reduce((a,b)=>b.profit>a.profit?b:a);
+  const host=document.getElementById("profit");host.innerHTML="";
+  const W=Math.max(host.clientWidth,300), rowH=40, lw=W<520?118:170, H=rows.length*rowH+30;
+  const ext=[d3.min(rows,r=>Math.min(0,r.plo)),d3.max(rows,r=>Math.max(0,r.phi))];
+  const x=d3.scaleLinear().domain(ext).nice().range([lw,W-(W<520?78:118)]);
+  const svg=d3.select(host).append("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("width",W).attr("height",H).attr("role","img").attr("aria-label","Extra profit by option");
+  svg.append("line").attr("x1",x(0)).attr("x2",x(0)).attr("y1",0).attr("y2",H-24).attr("stroke",css("--axis"));
+  const fm=v=>(v<0?"−$":"$")+d3.format(",.0f")(Math.abs(v));
+  rows.forEach((r,i)=>{const cy=i*rowH+rowH/2;const on=r===best;
+    const col=r.policy.startsWith("Men")?css("--mens"):r.policy.startsWith("Women")?css("--womens"):r.policy.startsWith("Targeted")?css("--ink-2"):css("--ctrl");
+    svg.append("text").attr("x",lw-10).attr("y",cy-4).attr("text-anchor","end").style("fill",css("--ink")).style("font-weight",on?700:500).text(r.policy);
+    svg.append("text").attr("x",lw-10).attr("y",cy+10).attr("text-anchor","end").style("font-family","var(--mono)").style("font-size","10px").style("fill",css("--muted")).text(pct(r.share_emailed)+" emailed");
+    const g=svg.append("g").on("mousemove",e=>showTip(e,`<b>${r.policy}</b><br>Extra sales ${fm(r.lift_vs_nobody*N)} → profit on them ${fm(r.lift_vs_nobody*mg*N)}<br>Email cost ${fm(r.share_emailed*ct*N)}<br><b>Extra profit ${fm(r.profit)}</b><br>Range ${fm(r.plo)} to ${fm(r.phi)}`)).on("mouseleave",hideTip);
+    g.append("rect").attr("x",lw).attr("y",cy-rowH/2).attr("width",W-lw).attr("height",rowH).attr("fill","transparent");
+    g.append("rect").attr("x",Math.min(x(0),x(r.profit))).attr("y",cy-8).attr("height",16).attr("rx",3).attr("width",Math.max(1,Math.abs(x(r.profit)-x(0)))).attr("fill",col).attr("opacity",on?1:.55);
+    if(r.share_emailed>0){g.append("line").attr("x1",x(r.plo)).attr("x2",x(r.phi)).attr("y1",cy).attr("y2",cy).attr("stroke",css("--ink")).attr("stroke-width",1.2);}
+    g.append("text").attr("x",Math.max(x(r.profit),x(r.phi||0),x(0))+8).attr("y",cy).attr("dy",".35em").style("font-family","var(--mono)").style("font-size","11px").style("fill",css("--ink")).style("font-weight",on?600:400).text(fm(r.profit)+(on?" · best":""));
+  });
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-24})`).call(d3.axisBottom(x).ticks(5).tickFormat(v=>fm(v)).tickSizeOuter(0));
+  const men=rows.find(r=>r.policy.startsWith("Men")), tg=rows.find(r=>r.policy.startsWith("Targeted"));
+  const be=(men.lift_vs_nobody-tg.lift_vs_nobody)*mg/(men.share_emailed-tg.share_emailed);
+  document.getElementById("profitNote").innerHTML=`Extra profit over sending nothing, for ${d3.format(",")(N)} customers. Lines show the 95% range. At ${Math.round(mg*100)}% margin, targeting beats emailing everyone only when an email costs more than <b>$${Math.max(0,be).toFixed(3)}</b>, and the gap between the two sits well inside the noise. <b>So keep it simple: send the men's email to everyone</b>, unless emails cost more than that.`;
+}
+function renderCells(){
+  const cells=[...new Set(C.map(r=>r.cell))];
+  document.getElementById("cells").innerHTML=`<table><thead><tr><th>Customer type</th><th class="n">Customers</th><th>Targeted option sends</th></tr></thead><tbody>${cells.map(c=>{const r=C.find(q=>q.cell===c&&q.chosen===1);return `<tr><td>${c}</td><td class="n">${d3.format(",")(r.customers)}</td><td><span style="color:${COL(r.arm)};font-weight:600">${ARMS[r.arm]}</span></td></tr>`;}).join("")}</tbody></table><p class="note" style="margin-top:8px">Picked on the training half by highest spend per customer.</p>`;
+}
+function renderRegistry(){
+  const R=S.registry;
+  const y=["metrics:",...R.metrics.map(m=>`  - id: ${m.id}\n    name: "${m.name}"\n    role: ${m.role}\n    column: ${m.column}`),"guardrails:",...R.guardrails.map(g=>`  - id: ${g.id}\n    rule: "${g.rule}"`),`alpha: ${R.alpha}`,`multiple_testing: ${R.multiple_testing}`].join("\n");
+  document.getElementById("registry").textContent=y;
+  document.getElementById("logCount").textContent=`${L.length} checks logged`;
+  document.getElementById("log").innerHTML=`<thead><tr><th>Check</th><th>Action</th></tr></thead><tbody>${L.map(r=>`<tr><td>${r.check}</td><td>${r.action}</td></tr>`).join("")}</tbody>`;
+}
+
+function renderAll(){renderMemo();renderKPIs();renderScore();renderSplit();renderBalance();renderSeq();renderAA();renderSeg();renderCuped();renderProfit();renderCells();renderRegistry();}
+
+async function get(file,parse){for(const [u,k] of [[RAW(file),"live"],...FALLBACKS.map(p=>[p+file,"snapshot"])]){try{const r=await fetch(u,{cache:"no-store"});if(!r.ok)throw 0;const t=await r.text();return {d:parse(t),k};}catch(e){}}throw new Error(file);}
+async function boot(){
+  const src=document.getElementById("src");
+  try{
+    const auto=t=>d3.csvParse(t,d3.autoType);
+    const [s,e,q,g,p,c,b,l]=await Promise.all([get("summary.json",JSON.parse),get("estimates.csv",auto),get("sequential.csv",auto),get("segments.csv",auto),get("policy.csv",auto),get("policy_cells.csv",auto),get("balance.csv",auto),get("data_quality_log.csv",auto)]);
+    S=s.d;E=e.d;Q=q.d;G=g.d;P=p.d;C=c.d;B=b.d;L=l.d;
+    src.innerHTML=s.k==="live"?`<span class="dot live"></span>Live from <a href="https://github.com/${SOURCE.repo}/tree/${SOURCE.branch}/${SOURCE.dir}" target="_blank" rel="noopener">github.com/${SOURCE.repo}</a>`:`<span class="dot"></span>Showing the bundled copy. GitHub could not be reached.`;
+    seg("scaleSeg",[["rel","% change"],["abs","Actual units"]],"scale",renderScore);
+    seg("seqMetric",[["spend","Spend"],["conversion","Purchases"],["visit","Visits"]],"seqMetric",renderSeq);
+    seg("seqArm",[["Mens E-Mail","Men's email"],["Womens E-Mail","Women's email"]],"seqArm",renderSeq);
+    seg("segPick",[["purchase_history","Bought before"],["history_band","Last year's spend"],["recency_band","Last purchase"],["newbie","New or returning"],["channel","Channel"],["zip_code","Area"]],"seg",renderSeg);
+    ["mg","ct","ls"].forEach(id=>document.getElementById(id).addEventListener("input",renderProfit));
+    renderAll();
+  }catch(err){src.innerHTML=`<span class="dot"></span>Could not load the results. Check your connection and refresh.`;console.error(err);}
+}
+boot();
+let rt;addEventListener("resize",()=>{if(!S)return;clearTimeout(rt);rt=setTimeout(renderAll,150);});
+new MutationObserver(()=>S&&renderAll()).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>S&&renderAll());
+</script>

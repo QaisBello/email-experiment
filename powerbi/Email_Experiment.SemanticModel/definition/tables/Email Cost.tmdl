@@ -1,0 +1,24 @@
+/// What-if: cost per email sent ($0 to $0.30). Default $0.02.
+table 'Email Cost'
+
+	/// Selected cost per email ($0.02 if none selected).
+	measure 'Email Cost Value' = SELECTEDVALUE ( 'Email Cost'[Email Cost], 0.02 )
+		formatString: $0.000
+		displayFolder: What-if
+
+	column 'Email Cost'
+		dataType: double
+		formatString: $0.000
+		summarizeBy: none
+		sourceColumn: Email Cost
+
+	partition 'Email Cost' = m
+		mode: import
+		source = ```
+				let
+				    Source = Table.FromList(List.Transform({0..60}, each _ * 0.005), Splitter.SplitByNothing(), {"Email Cost"}),
+				    Typed = Table.TransformColumnTypes(Source, {{"Email Cost", type number}})
+				in
+				    Typed
+				```
+
